@@ -3,6 +3,7 @@
     "name": "sabong-app",
     "slug": "sabong-app",
     "version": "1.0.0",
+    "newArchEnabled": true,
 
     "web": {
       "favicon": "./assets/favicon.png"
