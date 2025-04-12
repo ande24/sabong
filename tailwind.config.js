@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./App.{js,ts,tsx}', './components/**/*.{js,ts,tsx}'],
+  content: [
+    './App.{js,ts,tsx}', 
+    './components/**/*.{js,ts,tsx}'
+  ],
   darkMode: 'class',
   presets: [require('nativewind/preset')],
   theme: {
@@ -14,7 +17,11 @@ module.exports = {
       xl: '1280px',
       '2xl': '1536px',
     },
-    extend: {},
+    extend: {
+      gridTemplateColumns: {
+        3: 'repeat(3, minmax(0, 1fr))', // Defines a 3-column grid
+      },
+    },
   },
   plugins: [],
 };
