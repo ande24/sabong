@@ -16,12 +16,12 @@ const StyledGradient = cssInterop(LinearGradient, {
   className: 'style'
 });
 
-interface BetWalaProps {
+interface BetDrawProps {
     onClose: () => void;
     onConfirm: () => void;
   }
 
-export const BetWala: React.FC<BetWalaProps> = ({ onClose, onConfirm }) => {
+export const BetDraw: React.FC<BetDrawProps> = ({ onClose, onConfirm }) => {
     const [betAmount, setBetAmount] = useState('0');
 
     useEffect(() => {
@@ -44,12 +44,12 @@ export const BetWala: React.FC<BetWalaProps> = ({ onClose, onConfirm }) => {
 
             <View className="rounded-t-2xl w-full">
                 <StyledGradient
-                    colors={['#1e3a8a', '#1d4ed8']}
+                    colors={['#166534', '#16a34a']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     className="flex-row justify-center items-center w-full rounded-t-2xl p-4 relative"
                 >
-                    <Text className="text-white text-4xl font-extrabold">WALA</Text>
+                    <Text className="text-white text-4xl font-extrabold">DRAW</Text>
                     <TouchableOpacity className='absolute right-3 bg-black/20 rounded-full p-2' onPress={() => onClose()}>
                         <FeatherIcon name="x" size={24} color="white" />
                     </TouchableOpacity>
@@ -57,7 +57,7 @@ export const BetWala: React.FC<BetWalaProps> = ({ onClose, onConfirm }) => {
             </View>
 
             <StyledGradient
-                colors={['#0f172a', '#172554']}
+                colors={['#022c22', '#14532d']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="flex-col justify-center items-center w-full rounded-b-2xl px-4"
@@ -84,7 +84,7 @@ export const BetWala: React.FC<BetWalaProps> = ({ onClose, onConfirm }) => {
                         }
                     >
                         <StyledGradient
-                            colors={['#1e40af', '#2563eb']}
+                            colors={['#166534', '#16a34a']}
                             start={{ x: 0, y: 1 }}
                             end={{ x: 0, y: 0 }}
                             className="flex justify-center items-center w-full h-full rounded-l-md"
@@ -110,7 +110,7 @@ export const BetWala: React.FC<BetWalaProps> = ({ onClose, onConfirm }) => {
                         }
                     >
                         <StyledGradient
-                            colors={['#1e40af', '#2563eb']}
+                            colors={['#166534', '#16a34a']}
                             start={{ x: 0, y: 1 }}
                             end={{ x: 0, y: 0 }}
                             className="flex justify-center items-center w-full h-full rounded-r-md"
@@ -177,15 +177,15 @@ export const BetWala: React.FC<BetWalaProps> = ({ onClose, onConfirm }) => {
                 <TouchableOpacity 
                     onPress={() => {
                         Alert.alert(
-                        "WALA!", 
+                        "DRAW!", 
                         `Your bet of ₱${betAmount} has been confirmed.`
                         ); 
                         onConfirm();
                     }} 
-                    className="bg-blue-500 p-[2px] rounded-md mb-4 w-full"
+                    className="bg-green-600 p-[2px] rounded-md mb-4 w-full"
                 >
                     <StyledGradient
-                        colors={['#1e40af', '#2563eb']}
+                        colors={['#166534', '#16a34a']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 0, y: 1 }}
                         className="flex justify-center items-center w-full rounded-md py-3"

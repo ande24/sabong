@@ -7,8 +7,11 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { cssInterop } from 'nativewind';
-import './global.css';
 import { BetWala } from 'components/BetWala';
+import { BetMeron } from 'components/BetMeron';
+import { BetDraw } from 'components/BetDraw';
+import './global.css';
+
 
 const StyledGradient = cssInterop(LinearGradient, {
   className: 'style'
@@ -27,6 +30,14 @@ export default function App() {
     <SafeAreaView className="flex-1 bg-zinc-950">
       <Modal animationType='slide' transparent={true} visible={showBetWala}>
         <BetWala onClose={() => {setShowBetWala(false)}} onConfirm={() => {setShowBetWala(false)}}/>
+      </Modal>
+
+      <Modal animationType='slide' transparent={true} visible={showBetMeron}>
+        <BetMeron onClose={() => {setShowBetMeron(false)}} onConfirm={() => {setShowBetMeron(false)}}/>
+      </Modal>
+
+      <Modal animationType='slide' transparent={true} visible={showBetDraw}>
+        <BetDraw onClose={() => {setShowBetDraw(false)}} onConfirm={() => {setShowBetDraw(false)}}/>
       </Modal>
 
       <View className="flex-1 flex justify-start items-center flex-col pt-10 px-2 bg-zinc-950">
