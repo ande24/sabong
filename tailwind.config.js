@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './App.{js,ts,tsx}', 
+    "./app/**/*.{js,jsx,ts,tsx}",
     './components/**/*.{js,ts,tsx}'
   ],
   darkMode: 'class',
@@ -19,7 +19,7 @@ module.exports = {
     },
     extend: {
       gridTemplateColumns: {
-        3: 'repeat(3, minmax(0, 1fr))', // Defines a 3-column grid
+        3: 'repeat(3, minmax(0, 1fr))',
       },
     },
   },

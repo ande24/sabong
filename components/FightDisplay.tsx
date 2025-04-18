@@ -53,7 +53,7 @@ export const FightDisplay: React.FC<FightDisplayProps> = ({ onPressMeron, onPres
               />
 
               <Text className='absolute inset-0 text-center mt-4 text-xs text-yellow-700'>FIGHT</Text>
-              <Text className='absolute inset-0 text-center mt-[23px] mr-[0.5] text-3xl font-bold text-yellow-700'>123</Text>
+              <Text className='absolute inset-0 text-center mt-[23px] mr-[0.5] text-2xl font-bold text-yellow-700'>123</Text>
             </View>
 
             <StyledGradient

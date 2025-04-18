@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Modal, Text, TouchableOpacity, View, Dimensions, SafeAreaView } from 'react-native';
-import { FightDisplay } from 'components/FightDisplay';
-import { BetSummary } from 'components/BetSummary';
+import { Modal, Text, TouchableOpacity, View, Dimensions } from 'react-native';
+
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { cssInterop } from 'nativewind';
-import { BetWala } from 'components/BetWala';
-import { BetMeron } from 'components/BetMeron';
-import { BetDraw } from 'components/BetDraw';
-import './global.css';
 
+import { FightDisplay } from '../components/FightDisplay';
+import { BetSummary } from '../components/BetSummary';
+import { BetWala } from '../components/BetWala';
+import { BetMeron } from '../components/BetMeron';
+import { BetDraw } from '../components/BetDraw';
+import { Scanner } from '../components/Scanner';
+
+import '../global.css';
 
 const StyledGradient = cssInterop(LinearGradient, {
   className: 'style'
 });
 
-export default function App() {
+export default function Home() {
   const { width, height } = Dimensions.get('window');
   console.log(`Phone width: ${width}`); 
   console.log(`Phone height: ${height}`); 
@@ -25,9 +28,10 @@ export default function App() {
   const [showBetWala, setShowBetWala] = useState(false);
   const [showBetMeron, setShowBetMeron] = useState(false);
   const [showBetDraw, setShowBetDraw] = useState(false);
+  const [showScan, setShowScan] = useState(false);
 
   return (
-    <SafeAreaView className="flex-1 bg-zinc-950">
+    <View className="flex-1 bg-zinc-950">
       <Modal animationType='slide' transparent={true} visible={showBetWala}>
         <BetWala onClose={() => {setShowBetWala(false)}} onConfirm={() => {setShowBetWala(false)}}/>
       </Modal>
@@ -41,6 +45,7 @@ export default function App() {
       </Modal>
 
       <View className="flex-1 flex justify-start items-center flex-col pt-10 px-2 bg-zinc-950">
+        
         <View className={`flex-row justify-between w-full items-start bg-zinc-950 border-0 py-6 pl-10 `}>
           <View className='flex-row items-center'>
             <Text className='text-4xl font-extrabold text-yellow-500'>e</Text>
@@ -55,13 +60,23 @@ export default function App() {
           
         </View>
 
-        <View className={`${styles.container} flex-[35]`}>
-          <FightDisplay onPressDraw={() => {setShowBetDraw(true)}} onPressMeron={() => {setShowBetMeron(true)}} onPressWala={() => {setShowBetWala(true)}}/>
-        </View> 
-        
-        <View className={`${styles.container} flex-[50]`}> 
-          <BetSummary />
-        </View>
+        {!showScan && (
+        <>
+          <View className={`${styles.container} flex-[35]`}>
+            <FightDisplay onPressDraw={() => {setShowBetDraw(true)}} onPressMeron={() => {setShowBetMeron(true)}} onPressWala={() => {setShowBetWala(true)}}/>
+          </View> 
+          
+          <View className={`${styles.container} flex-[50]`}> 
+            <BetSummary />
+          </View>
+        </>
+        )}
+
+        {showScan && (
+          <View className='flex-[96] w-full mb-4'>
+            <Scanner />
+          </View>
+        )}
 
         <View className={`flex-[40] w-full flex flex-col gap-y-1`}>
           <View className={`bg-zinc-800 w-full justify-center rounded-md border-zinc-600 border p-0 flex-1 items-center mb-1`}>
@@ -117,24 +132,25 @@ export default function App() {
             </TouchableOpacity> 
           </View>
           
+          
 
           <View className='flex-row w-full gap-x-1 flex-1'>
-            <TouchableOpacity className={`${styles.button} flex-1 flex-row bg-zinc-950 border border-zinc-600 rounded-md`}>
+            <TouchableOpacity onPress={() => {setShowScan(true)}} className={`${styles.button} flex-1 flex-row bg-zinc-950 border border-zinc-600 rounded-md`}>
               <FeatherIcon name='minus-square' size={18} color='white'/>
               <Text className='hidden 3xs:block'> </Text>
               <Text className={styles.buttonText}> PAYOUT SCAN</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity className={`${styles.button} flex-1 flex-row bg-zinc-950 border border-zinc-600 rounded-md`}>
+            <TouchableOpacity onPress={() => setShowScan(false)} className={`flex justify-center items-center flex-1 flex-row bg-zinc-950 border border-zinc-600 rounded-md`}>
               <FeatherIcon name='x-square' size={18} color='white'/>
               <Text className='hidden 3xs:block'> </Text>
-              <Text className={styles.buttonText}> CANCEL SCAN</Text>
+              <Text className="text-white text-center font-semibold text-2xl"> CANCEL SCAN</Text>
             </TouchableOpacity>
           </View> 
         </View>
       </View>
       <StatusBar style='light' />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -145,3 +161,4 @@ const styles = {
   buttonText: "text-white text-center font-semibold text-2xl",
   statusButtonText: "text-white text-center font-semibold text-base",
 }
+
