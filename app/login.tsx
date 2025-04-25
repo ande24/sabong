@@ -1,8 +1,9 @@
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { cssInterop } from 'nativewind';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
+import SignIn from "firebase/auth/signin";
 
 const StyledGradient = cssInterop(LinearGradient, {
   className: 'style'
@@ -10,8 +11,35 @@ const StyledGradient = cssInterop(LinearGradient, {
 
 export default function Login () {
     const router = useRouter();
-    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    useEffect(() => {
+        const autoLogin = async () => {
+            setEmail("andeellenes@gmail.com")
+            setPassword("password");
+
+            await SignIn({ email, password });
+            router.push("/home");
+        }
+        
+        autoLogin();
+    }, []);
+
+    const handleLogin = async () => {
+        if (email === "" || password === "") {
+            Alert.alert("Error", "Please fill in all fields.");
+            return;
+        }
+
+        const res = await SignIn({ email, password });
+        if (res.err) {
+            Alert.alert("Error", "Login failed. Please check your credentials.");
+            return;
+        }
+        Alert.alert("Success", "Login successful!");
+        router.push("/home");
+    }
 
     return (
         <View className="bg-zinc-950 flex-1 justify-center items-center">
@@ -22,8 +50,8 @@ export default function Login () {
                 </View>
 
                 <TextInput
-                value={username || ""}
-                onChangeText={setUsername}
+                value={email || ""}
+                onChangeText={setEmail}
                 className="bg-zinc-700 text-white p-3 w-full mb-4 rounded-lg border border-zinc-600"
                 placeholder="Enter your email"
                 placeholderTextColor="#B0B0B0"
@@ -40,17 +68,7 @@ export default function Login () {
                 />
 
                 <TouchableOpacity
-                onPress={() => {
-                    if (username === "andeellenes@gmail.com" && password === "password") {
-                        Alert.alert("Login Success!");
-                        router.push("/home");
-                    }
-                    else {
-                        Alert.alert("Error", "Invalid Credentials!");
-                        setPassword("");
-                        setUsername("");
-                    }
-                }}
+                onPress={handleLogin}
                 className="bg-yellow-500 w-1/3 rounded-lg flex items-center justify-center"
                 >
                     <StyledGradient

@@ -1,18 +1,17 @@
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import { useState } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export const Scanner = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
   if (!permission) {
-    // Camera permissions are still loading.
     return <View />;
   }
 
   if (!permission.granted) {
-    // Camera permissions are not granted yet.
     return (
       <View style={styles.container}>
         <Text style={styles.message}>We need your permission to show the camera</Text>
@@ -36,6 +35,9 @@ export const Scanner = () => {
             barcodeTypes: ["qr"],
         }}
         style={styles.camera} facing={'back'}>
+          <View className='absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center opacity-30'>
+            <Icon name='scan-outline' size={350} color='white'/>
+          </View>
       </CameraView>
     </View>
   );

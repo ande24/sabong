@@ -4,13 +4,15 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  BackHandler,
-  Alert
+  Alert,
 } from 'react-native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { cssInterop } from 'nativewind';
+
+import { getAuth, User } from 'firebase/auth';
+import { getFirestore, getDocs, collection, addDoc } from 'firebase/firestore';
 
 const StyledGradient = cssInterop(LinearGradient, {
   className: 'style'
@@ -22,21 +24,54 @@ interface BetMeronProps {
   }
 
 export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
+    const [user, setUser] = useState<User | null>(null);
+
     const [betAmount, setBetAmount] = useState('0');
 
     useEffect(() => {
-        const backAction = () => {
-            onClose(); 
-            return true; 
+        const fetchUser = async () => {
+            try {
+            const auth = getAuth();
+            const currentUser = auth.currentUser;
+
+            if (!currentUser) {
+                return;
+            }
+
+            setUser(currentUser);
+            } catch (error) {
+            console.error('Error fetching user:', error);
+            }
         };
-
-        const backHandler = BackHandler.addEventListener(
-            'hardwareBackPress',
-            backAction
-        );
-
-        return () => backHandler.remove(); 
+    
+        fetchUser();
     }, []);
+
+    const handleSubmit = async () => {
+        try {
+            if (!user) {
+                return;
+            }
+
+            const db = getFirestore();
+            const betCollection = collection(db, 'tellers', user.uid, 'bets');
+            await addDoc(betCollection, {
+                address1: '<address1>',
+                address2: '<address2>',
+                amount: betAmount,
+                fight_number: '<fight_number>',
+                side: 'MERON',
+                timestamp: new Date(),
+                venue: '<venue>',
+            });
+
+            console.log('Bet added successfully!');
+            Alert.alert('MERON!', 'Your bet has been placed successfully!');
+            onClose();
+        } catch (error) {
+            console.error('Error adding bet:', error);
+        }
+    }
 
     return (
         <View className="flex-1 bg-black/80 justify-center items-center">
@@ -128,11 +163,11 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
                         key={index}
                         className="w-[32.6%] h-16 bg-white justify-center items-center rounded-md"
                         onPress={() => {
-                        if (betAmount === '0') {
-                            setBetAmount(item);
-                        } else {
-                            setBetAmount((prev) => prev + item);
-                        }
+                            if (betAmount === '0') {
+                                setBetAmount(item);
+                            } else {
+                                setBetAmount((prev) => prev + item);
+                            }
                         }}
                     >
                         <StyledGradient
@@ -176,13 +211,7 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
                 </View>
 
                 <TouchableOpacity 
-                    onPress={() => {
-                        Alert.alert(
-                        "MERON!", 
-                        `Your bet of ₱${betAmount} has been confirmed.`
-                        ); 
-                        onConfirm();
-                    }} 
+                    onPress={handleSubmit} 
                     className="bg-red-700 p-[2px] rounded-md mb-4 w-full"
                 >
                     <StyledGradient

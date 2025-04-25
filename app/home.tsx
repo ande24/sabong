@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
+import React, { useState, useEffect } from 'react';
 import { Modal, Text, TouchableOpacity, View, Dimensions } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { cssInterop } from 'nativewind';
+
+import { getAuth, User } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 import { FightDisplay } from '../components/FightDisplay';
 import { BetSummary } from '../components/BetSummary';
@@ -16,31 +19,70 @@ import { Scanner } from '../components/Scanner';
 
 import '../global.css';
 
+
 const StyledGradient = cssInterop(LinearGradient, {
   className: 'style'
 });
 
 export default function Home() {
-  const { width, height } = Dimensions.get('window');
-  console.log(`Phone width: ${width}`); 
-  console.log(`Phone height: ${height}`); 
+  // const { width, height } = Dimensions.get('window');
+  // console.log(`Phone width: ${width}`); 
+  // console.log(`Phone height: ${height}`); 
+
+  const router = useRouter();
+
+  const [user, setUser] = useState<User | null>(null);
+  const [email, setEmail] = useState("");
 
   const [showBetWala, setShowBetWala] = useState(false);
   const [showBetMeron, setShowBetMeron] = useState(false);
   const [showBetDraw, setShowBetDraw] = useState(false);
   const [showScan, setShowScan] = useState(false);
 
+  useEffect(() => {
+    const fetchEmail = async () => {
+      try {
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
+
+        if (!currentUser) {
+          console.log('No user is currently signed in. Redirecting to login...');
+          router.push('/login'); 
+          return;
+        }
+
+        setUser(currentUser);
+
+        const db = getFirestore();
+        const docRef = doc(db, 'tellers', currentUser.uid);
+        const docu = await getDoc(docRef);
+
+        if (docu.exists()) {
+          const data = docu.data();
+          setEmail(data.email);
+          // console.log('Teller email:', data.email);
+        } else {
+          console.log('Teller document does not exist.');
+        }
+      } catch (error) {
+        console.error('Error fetching user or teller email:', error);
+      }
+    };
+
+    fetchEmail();
+  }, []);
+
   return (
-    <View className="flex-1 bg-zinc-950">
-      <Modal animationType='slide' transparent={true} visible={showBetWala}>
+    <View className="flex-1 pb-2 bg-zinc-950">
+      <Modal onRequestClose={() => {setShowBetWala(false)}} animationType='slide' transparent={true} visible={showBetWala}>
         <BetWala onClose={() => {setShowBetWala(false)}} onConfirm={() => {setShowBetWala(false)}}/>
       </Modal>
 
-      <Modal animationType='slide' transparent={true} visible={showBetMeron}>
+      <Modal onRequestClose={() => {setShowBetMeron(false)}} animationType='slide' transparent={true} visible={showBetMeron}>
         <BetMeron onClose={() => {setShowBetMeron(false)}} onConfirm={() => {setShowBetMeron(false)}}/>
       </Modal>
 
-      <Modal animationType='slide' transparent={true} visible={showBetDraw}>
+      <Modal onRequestClose={() => {setShowBetDraw(false)}} animationType='slide' transparent={true} visible={showBetDraw}>
         <BetDraw onClose={() => {setShowBetDraw(false)}} onConfirm={() => {setShowBetDraw(false)}}/>
       </Modal>
 
@@ -48,8 +90,8 @@ export default function Home() {
         
         <View className={`flex-row justify-between w-full items-start bg-zinc-950 border-0 py-6 pl-10 `}>
           <View className='flex-row items-center'>
-            <Text className='text-4xl font-extrabold text-yellow-500'>e</Text>
-            <Text className='text-4xl font-extrabold text-white'>Sabong</Text>
+            <Text className='text-4xl font-bold text-yellow-500'>e</Text>
+            <Text className='text-4xl font-bold text-white'>Sabong</Text>
           </View>
 
           <View className=' bg-zinc-800 py-2 px-4 rounded-full border border-zinc-600 flex-row'>
@@ -99,7 +141,7 @@ export default function Home() {
                 end={{ x: 0, y: 0 }}
                 className=" h-full w-full flex-row items-center justify-center rounded-md"
               >
-                <FeatherIcon name='download' size={18} color='white'/>
+                <MaterialIcon name='cash-plus' size={26} color='white'/>
                 <Text className={styles.buttonText}>  CASH IN</Text>
               </StyledGradient>
               
@@ -112,7 +154,7 @@ export default function Home() {
                 end={{ x: 0, y: 0 }}
                 className=" h-full w-full flex-row items-center justify-center rounded-md"
               >
-                <FeatherIcon name='upload' size={18} color='white'/>
+                <MaterialIcon name='cash-minus' size={26} color='white'/>
                 <Text className={styles.buttonText}>  CASH OUT</Text>
               </StyledGradient>
             </TouchableOpacity>
@@ -126,7 +168,7 @@ export default function Home() {
                 end={{ x: 0, y: 0 }}
                 className=" h-full w-full flex-row items-center justify-center rounded-md"
               >
-                <FeatherIcon name='book' size={18} color='white'/>
+                <MaterialIcon name='book-outline' size={22} color='white'/>
                 <Text className={styles.buttonText}>  VIEW SUMMARY</Text>
               </StyledGradient>
             </TouchableOpacity> 
@@ -136,20 +178,19 @@ export default function Home() {
 
           <View className='flex-row w-full gap-x-1 flex-1'>
             <TouchableOpacity onPress={() => {setShowScan(true)}} className={`${styles.button} flex-1 flex-row bg-zinc-950 border border-zinc-600 rounded-md`}>
-              <FeatherIcon name='minus-square' size={18} color='white'/>
+              <MaterialIcon name='qrcode-scan' size={18} color='white'/>
               <Text className='hidden 3xs:block'> </Text>
-              <Text className={styles.buttonText}> PAYOUT SCAN</Text>
+              <Text className={styles.buttonText}>  PAYOUT SCAN</Text>
             </TouchableOpacity>
             
             <TouchableOpacity onPress={() => setShowScan(false)} className={`flex justify-center items-center flex-1 flex-row bg-zinc-950 border border-zinc-600 rounded-md`}>
-              <FeatherIcon name='x-square' size={18} color='white'/>
+              <MaterialIcon name='scan-helper' size={18} color='white'/>
               <Text className='hidden 3xs:block'> </Text>
-              <Text className="text-white text-center font-semibold text-2xl"> CANCEL SCAN</Text>
+              <Text className="text-white text-center font-semibold text-2xl">  CANCEL SCAN</Text>
             </TouchableOpacity>
           </View> 
         </View>
       </View>
-      <StatusBar style='light' />
     </View>
   );
 }

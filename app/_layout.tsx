@@ -1,11 +1,16 @@
 import { Stack } from "expo-router";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import * as NavigationBar from 'expo-navigation-bar';
+import { StatusBar } from "expo-status-bar";
 
 export default function Layout() {
   return (
-    <SafeAreaProvider>
+    <>
+      <SafeAreaProvider>
         {<Stack screenOptions={{ headerShown: false }}/>}
-    </SafeAreaProvider>
+      </SafeAreaProvider>
+      <StatusBar style="light"  translucent={true} />
+    </>
   );
 }
 
