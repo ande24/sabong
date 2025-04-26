@@ -1,6 +1,5 @@
-import { SafeAreaView, Text, View, ScrollView } from 'react-native';
-import { useState, useEffect } from 'react';
-
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, Text, View, FlatList, StyleSheet } from 'react-native';
 import { getAuth, User } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 
@@ -37,8 +36,7 @@ export const BetSummary = () => {
         const db = getFirestore();
         const betCollection = collection(db, 'tellers', user.uid, 'bets');
         const unsubscribe = onSnapshot(betCollection, (betSnapshot) => {
-          const betList = betSnapshot.docs
-          .map((doc) => ({
+          const betList = betSnapshot.docs.map((doc) => ({
             id: doc.id,
             address1: doc.data().address1,
             address2: doc.data().address2,
@@ -50,7 +48,6 @@ export const BetSummary = () => {
           }));
 
           setBets(betList);
-          // console.log('Bets:', betList);
         });
 
         return unsubscribe;
@@ -66,76 +63,178 @@ export const BetSummary = () => {
         unsubscribe();
       }
     };
-  }, [user])
+  }, [user]);
+
+  const BetItem = React.memo(({ bet, index, isLastItem }: any) => (
+    <View>
+      <View style={styles.betContainer}>
+        <View style={styles.venueContainer}>
+          <Text style={styles.venueText}>{bet.venue}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>SIDE</Text>
+            <Text style={styles.label}>:</Text>
+          </View>
+          <View style={styles.valueContainer}>
+            <View
+              style={[
+                styles.sideContainer,
+                bet.side === 'MERON'
+                  ? styles.sideMeron
+                  : bet.side === 'WALA'
+                  ? styles.sideWala
+                  : styles.sideDraw,
+              ]}
+            >
+              <Text style={styles.value}>{bet.side}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>AMOUNT</Text>
+            <Text style={styles.label}>:</Text>
+          </View>
+          <View style={styles.valueContainer}>
+            <Text style={styles.value}>₱ {bet.amount}</Text>
+          </View>
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>FIGHT NUMBER</Text>
+            <Text style={styles.label}>:</Text>
+          </View>
+          <View style={styles.valueContainer}>
+            <Text style={styles.value}>{bet.fight_number}</Text>
+          </View>
+        </View>
+
+        <Text style={styles.footer}>
+          {bet.address1}
+          {'\n'}
+          {bet.address2}
+        </Text>
+      </View>
+
+      {!isLastItem && (
+        <Text style={styles.divider}>────────────────────────────────────────</Text>
+      )}
+    </View>
+  ));
 
   return (
-    <SafeAreaView className={styles.container}>
-      <Text className={styles.title}>BET SUMMARY</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>BET SUMMARY</Text>
 
-      <ScrollView className='pt-4'>
-        {bets.map((bet, index) => (
-          <View key={bet.id}>
-            <View className='flex-1 w-full mb-8'>
-              <View className='border border-zinc-600 rounded-md p-2 mb-4 flex items-center justify-center'>
-                <Text className='text-lg text-white'>{bet.venue}</Text>
-              </View>
-
-              <View className={`flex-row justify-start items-center mb-3`}>
-                <View className='w-1/2 flex-row justify-between'>
-                  <Text className={`${styles.label}`}>SIDE</Text>
-                  <Text className={`${styles.label}`}>:</Text>
-                </View>
-                
-                <View className='pl-3'>
-                  <View className={`${bet.side === "MERON" ? "bg-red-600" : bet.side === "WALA" ? "bg-blue-600" : "bg-green-600"} ${styles.sideContainer}`}>
-                    <Text className={styles.value}>{bet.side}</Text>
-                  </View>
-                </View>
-              </View>
-
-              <View className={styles.row}>
-                <View className='w-1/2 flex-row justify-between'>
-                  <Text className={styles.label}>AMOUNT</Text>
-                  <Text className={styles.label}>:</Text>
-                </View>
-                
-                <View className='pl-3'>
-                  <Text className={styles.value}>₱ {bet.amount}</Text>
-                </View>
-              </View>
-
-              <View className={styles.row}>
-                <View className='w-1/2 flex-row justify-between'>
-                  <Text className={styles.label}>FIGHT NUMBER</Text>
-                  <Text className={styles.label}>:</Text>
-                </View>
-                
-                <View className='pl-3'>
-                  <Text className={styles.value}>{bet.fight_number}</Text>
-                </View>
-              </View>
-
-              <Text className={styles.footer}>
-                {bet.address1}{'\n'}{bet.address2}
-              </Text>
-            </View>
-
-            {bets.length - 1 !== index && (
-              <Text className="text-zinc-600 text-base mb-10 text-center">──────────────────────────────────────────</Text>
-            )}
-          </View>
-        ))}
-      </ScrollView>
+      <FlatList
+        style={{ paddingTop: 8 }}
+        data={bets}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item: bet, index }) => (
+          <BetItem 
+            bet={bet} 
+            index={index} 
+            isLastItem={bets.length - 1 === index} 
+          />
+        )}
+        initialNumToRender={10}        
+        showsVerticalScrollIndicator={false}
+        maxToRenderPerBatch={10}
+        getItemLayout={(data, index) => ({
+          length: 150,
+          offset: 150 * index,
+          index,
+        })}
+      />
     </SafeAreaView>
   );
 };
 
-const styles = {
-  container: "flex-1 flex-col justify-center",
-  title: "text-2xl font-semibold text-white text-center mb-4 mt-1",
-  row: "flex-row justify-start items-center mb-4",
-  label: "text-lg text-zinc-600", 
-  sideContainer: "rounded-sm p-1 w-fit",
-  value: "text-lg text-white",
-  footer: "text-lg text-zinc-600 text-center mt-2",
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 16,
+    marginTop: 4,
+  },
+  betContainer: {
+    flex: 1,
+    marginBottom: 8,
+    width: '100%',
+  },
+  venueContainer: {
+    borderWidth: 1,
+    borderColor: '#52525b',
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  venueText: {
+    fontSize: 18,
+    color: 'white',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  labelContainer: {
+    width: '50%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  label: {
+    fontSize: 18,
+    color: '#52525b',
+  },
+  valueContainer: {
+    paddingLeft: 12,
+  },
+  sideContainer: {
+    borderRadius: 4,
+    padding: 4,
+    alignSelf: 'flex-start',
+  },
+  sideMeron: {
+    backgroundColor: '#dc2626',
+  },
+  sideWala: {
+    backgroundColor: '#2563eb',
+  },
+  sideDraw: {
+    backgroundColor: '#16a34a',
+  },
+  value: {
+    fontSize: 18,
+    color: 'white',
+  },
+  footer: {
+    fontSize: 18,
+    color: '#52525b',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  divider: {
+    color: '#52525b',
+    fontSize: 16,
+    marginBottom: 40,
+    marginTop: 24,
+    textAlign: 'center',
+  },
+});
+
+

@@ -4,7 +4,7 @@
     "slug": "sabong-app",
     "version": "1.0.0",
     "newArchEnabled": true,
-    "scheme": "myapp", 
+    "scheme": "myapp",
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
@@ -13,7 +13,8 @@
       "tsconfigPaths": true
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-font"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",

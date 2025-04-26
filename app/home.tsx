@@ -31,9 +31,6 @@ export default function Home() {
 
   const router = useRouter();
 
-  const [user, setUser] = useState<User | null>(null);
-  const [email, setEmail] = useState("");
-
   const [showBetWala, setShowBetWala] = useState(false);
   const [showBetMeron, setShowBetMeron] = useState(false);
   const [showBetDraw, setShowBetDraw] = useState(false);
@@ -51,15 +48,12 @@ export default function Home() {
           return;
         }
 
-        setUser(currentUser);
-
         const db = getFirestore();
         const docRef = doc(db, 'tellers', currentUser.uid);
         const docu = await getDoc(docRef);
 
         if (docu.exists()) {
           const data = docu.data();
-          setEmail(data.email);
           // console.log('Teller email:', data.email);
         } else {
           console.log('Teller document does not exist.');

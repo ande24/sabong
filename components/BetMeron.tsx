@@ -12,7 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { cssInterop } from 'nativewind';
 
 import { getAuth, User } from 'firebase/auth';
-import { getFirestore, getDocs, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
 const StyledGradient = cssInterop(LinearGradient, {
   className: 'style'
