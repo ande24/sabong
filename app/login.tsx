@@ -14,17 +14,18 @@ export default function Login () {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    useEffect(() => {
-        const autoLogin = async () => {
-            setEmail("andeellenes@gmail.com")
-            setPassword("password");
+    // AUTO LOGIN FOR TESTING PURPOSES
+    // useEffect(() => {
+    //     const autoLogin = async () => {
+    //         setEmail("andeellenes@gmail.com")
+    //         setPassword("password");
 
-            await SignIn({ email, password });
-            router.push("/home");
-        }
+    //         await SignIn({ email, password });
+    //         router.push("/home");
+    //     }
         
-        autoLogin();
-    }, []);
+    //     autoLogin();
+    // }, []);
 
     const handleLogin = async () => {
         if (email === "" || password === "") {

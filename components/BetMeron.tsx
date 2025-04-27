@@ -48,21 +48,34 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
     }, []);
 
     const handleSubmit = async () => {
+        if (parseInt(betAmount) < 20) {
+            Alert.alert('Invalid Bet', 'Minimum bet amount is 20.');
+            return;
+        }
+        if (parseInt(betAmount) > 5000) {
+            Alert.alert('Invalid Bet', 'Maximum bet amount is 5000.');
+            return;
+        }
         try {
             if (!user) {
                 return;
             }
 
             const db = getFirestore();
-            const betCollection = collection(db, 'tellers', user.uid, 'bets');
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const collectionName = `bets_${year}_${month}`;
+
+            const betCollection = collection(db, 'tellers', user.uid, collectionName);
             await addDoc(betCollection, {
-                address1: '<address1>',
-                address2: '<address2>',
                 amount: betAmount,
-                fight_number: '<fight_number>',
+                fight_number: '123',
                 side: 'MERON',
                 timestamp: new Date(),
-                venue: '<venue>',
+                outcome: 'PENDING',
+                odds: 1.57,
             });
 
             console.log('Bet added successfully!');
