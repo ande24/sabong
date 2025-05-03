@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { cssInterop } from 'nativewind';
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import SignIn from "firebase/auth/signin";
+import SignIn from "../firebase/auth/signin";
 
 const StyledGradient = cssInterop(LinearGradient, {
   className: 'style'

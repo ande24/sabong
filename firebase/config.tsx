@@ -15,6 +15,8 @@ const firebaseConfig = {
 
 const firebase_app = initializeApp(firebaseConfig);
 
+console.log("Firebase app initialized:", firebase_app.name);
+
 const auth = initializeAuth(firebase_app, {
     persistence: Platform.OS === "web"
     ? inMemoryPersistence 
@@ -24,4 +26,3 @@ const auth = initializeAuth(firebase_app, {
 export const firebase_auth = auth;
 
 export default firebase_app;
-  

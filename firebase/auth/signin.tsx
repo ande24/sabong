@@ -1,5 +1,5 @@
-import firebase_app from "../config";
-import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
+import { firebase_auth } from "../config";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 interface SignInProps {
     email: string,
@@ -7,12 +7,11 @@ interface SignInProps {
 }
 
 export default async function SignIn({ email, password }: SignInProps) {
-    const auth = getAuth(firebase_app);
     let res = null,
         err = null;
 
     try {
-        res = await signInWithEmailAndPassword(auth, email, password);
+        res = await signInWithEmailAndPassword(firebase_auth, email, password);
     } catch (e) {
         err = e;
     }
