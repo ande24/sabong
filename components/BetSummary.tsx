@@ -22,114 +22,114 @@ export const BetSummaryDaily = ({
   const [user, setUser] = useState<User | null>(null);
   const [bets, setBets] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const auth = getAuth();
-        const currentUser = auth.currentUser;
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const auth = getAuth();
+  //       const currentUser = auth.currentUser;
 
-        if (!currentUser) {
-          return;
-        }
+  //       if (!currentUser) {
+  //         return;
+  //       }
 
-        setUser(currentUser);
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      }
-    };
+  //       setUser(currentUser);
+  //     } catch (error) {
+  //       console.error('Error fetching user:', error);
+  //     }
+  //   };
 
-    fetchUser();
-  }, []);
+  //   fetchUser();
+  // }, []);
 
-  useEffect(() => {
-    const fetchBets = () => {
-      if (!user) {
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchBets = () => {
+  //     if (!user) {
+  //       return;
+  //     }
 
-      try {
-        const db = getFirestore();
+  //     try {
+  //       const db = getFirestore();
         
-        const now = new Date();
+  //       const now = new Date();
 
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const collectionName = `bets_${year}_${month}`;
+  //       const year = now.getFullYear();
+  //       const month = String(now.getMonth() + 1).padStart(2, '0');
+  //       const collectionName = `bets_${year}_${month}`;
         
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  //       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  //       const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
         
-        const betCollection = collection(db, 'tellers', user.uid, collectionName);
-        const unsubscribe = onSnapshot(betCollection, (betSnapshot) => {
-          let betList = betSnapshot.docs.map((doc) => {
-            const timestamp = doc.data().timestamp.toDate();
+  //       const betCollection = collection(db, 'tellers', user.uid, collectionName);
+  //       const unsubscribe = onSnapshot(betCollection, (betSnapshot) => {
+  //         let betList = betSnapshot.docs.map((doc) => {
+  //           const timestamp = doc.data().timestamp.toDate();
 
-            return {
-              id: doc.id,
-              address1: doc.data().address1,
-              address2: doc.data().address2,
-              amount: doc.data().amount,
-              fight_number: doc.data().fight_number,
-              side: doc.data().side,
-              timestamp: timestamp,
-              formattedDate: timestamp.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              }),
-              formattedTime: timestamp.toLocaleTimeString('en-US', {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                  hour12: true,
-              }),
-              outcome: doc.data().outcome,
-              odds: doc.data().odds,
-            };
-          })
-          .filter((bet) => {
-            return bet.timestamp >= startOfDay && bet.timestamp < endOfDay;
-          });
+  //           return {
+  //             id: doc.id,
+  //             address1: doc.data().address1,
+  //             address2: doc.data().address2,
+  //             amount: doc.data().amount,
+  //             fight_number: doc.data().fight_number,
+  //             side: doc.data().side,
+  //             timestamp: timestamp,
+  //             formattedDate: timestamp.toLocaleDateString('en-US', {
+  //               year: 'numeric',
+  //               month: 'long',
+  //               day: 'numeric',
+  //             }),
+  //             formattedTime: timestamp.toLocaleTimeString('en-US', {
+  //                 hour: 'numeric',
+  //                 minute: '2-digit',
+  //                 hour12: true,
+  //             }),
+  //             outcome: doc.data().outcome,
+  //             odds: doc.data().odds,
+  //           };
+  //         })
+  //         .filter((bet) => {
+  //           return bet.timestamp >= startOfDay && bet.timestamp < endOfDay;
+  //         });
 
-          if (filterTime === 'desc') {
-            betList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-          }
-          else {
-            betList.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-          }
+  //         if (filterTime === 'desc') {
+  //           betList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  //         }
+  //         else {
+  //           betList.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  //         }
 
-          if (filterFight === 'select') {
-            betList = betList.filter((bet) => bet.fight_number === selectedFight);
-          }
+  //         if (filterFight === 'select') {
+  //           betList = betList.filter((bet) => bet.fight_number === selectedFight);
+  //         }
 
-          if (filterSide !== 'all') {
-            betList = betList.filter((bet) => bet.side === filterSide.toUpperCase());
-          }
+  //         if (filterSide !== 'all') {
+  //           betList = betList.filter((bet) => bet.side === filterSide.toUpperCase());
+  //         }
 
-          if (filterStatus !== 'all') {
-            betList = betList.filter(
-              (bet) =>
-                (filterStatus === 'pending' && bet.outcome === 'PENDING') ||
-                (filterStatus === 'completed' && bet.outcome.toUpperCase() !== 'PENDING')
-            );
-          }
+  //         if (filterStatus !== 'all') {
+  //           betList = betList.filter(
+  //             (bet) =>
+  //               (filterStatus === 'pending' && bet.outcome === 'PENDING') ||
+  //               (filterStatus === 'completed' && bet.outcome.toUpperCase() !== 'PENDING')
+  //           );
+  //         }
 
-          setBets(betList);
-        });
+  //         setBets(betList);
+  //       });
 
-        return unsubscribe;
-      } catch (error) {
-        console.error('Error fetching bets:', error);
-      }
-    };
+  //       return unsubscribe;
+  //     } catch (error) {
+  //       console.error('Error fetching bets:', error);
+  //     }
+  //   };
 
-    const unsubscribe = fetchBets();
+  //   const unsubscribe = fetchBets();
 
-    return () => {
-      if (typeof unsubscribe === 'function') {
-        unsubscribe();
-      }
-    };
-  }, [user, filterFight, selectedFight, filterTime, filterStatus, filterSide]);
+  //   return () => {
+  //     if (typeof unsubscribe === 'function') {
+  //       unsubscribe();
+  //     }
+  //   };
+  // }, [user, filterFight, selectedFight, filterTime, filterStatus, filterSide]);
 
   const BetItem = React.memo(({ bet }: any) => (
     <View style={{ height: itemHeight }}>

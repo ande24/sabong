@@ -13,5 +13,5 @@ export default function Index() {
 //     return null; // Prevent rendering until fonts are loaded
 //   };
 
-  return <Redirect href="/login" />;
+  return <Redirect href="/home" />;
 }

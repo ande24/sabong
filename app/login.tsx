@@ -28,16 +28,16 @@ export default function Login () {
     // }, []);
 
     const handleLogin = async () => {
-        if (email === "" || password === "") {
-            Alert.alert("Error", "Please fill in all fields.");
-            return;
-        }
+        // if (email === "" || password === "") {
+        //     Alert.alert("Error", "Please fill in all fields.");
+        //     return;
+        // }
 
-        const res = await SignIn({ email, password });
-        if (res.err) {
-            Alert.alert("Error", "Login failed. Please check your credentials.");
-            return;
-        }
+        // const res = await SignIn({ email, password });
+        // if (res.err) {
+        //     Alert.alert("Error", "Login failed. Please check your credentials.");
+        //     return;
+        // }
         Alert.alert("Success", "Login successful!");
         router.push("/home");
     }

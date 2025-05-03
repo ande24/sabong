@@ -29,16 +29,18 @@ export const Scanner = () => {
 
   return (
     <View style={styles.container}>
+      <View className='absolute z-10 top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-transparent'>
+        <View className='flex-1 justify-center items-center opacity-30'>
+          <Icon name='scan-outline' size={350} color='white'/>
+        </View>
+      </View>
       <CameraView 
         onBarcodeScanned={scanned ? undefined : handleScan}  
         barcodeScannerSettings={{
             barcodeTypes: ["qr"],
         }}
-        style={styles.camera} facing={'back'}>
-          <View className='absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center opacity-30'>
-            <Icon name='scan-outline' size={350} color='white'/>
-          </View>
-      </CameraView>
+        style={styles.camera} facing={'back'} 
+      />
     </View>
   );
 }
@@ -46,6 +48,7 @@ export const Scanner = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    position: 'relative',
     justifyContent: 'center',
   },
   message: {

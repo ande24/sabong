@@ -29,42 +29,42 @@ export const BetWala: React.FC<BetWalaProps> = ({ onClose, onConfirm }) => {
 
     const [betAmount, setBetAmount] = useState('0');
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-            const auth = getAuth();
-            const currentUser = auth.currentUser;
+    // useEffect(() => {
+    //     const fetchUser = async () => {
+    //         try {
+    //         const auth = getAuth();
+    //         const currentUser = auth.currentUser;
 
-            if (!currentUser) {
-                return;
-            }
+    //         if (!currentUser) {
+    //             return;
+    //         }
 
-            setUser(currentUser);
-            } catch (error) {
-            console.error('Error fetching user:', error);
-            }
-        };
+    //         setUser(currentUser);
+    //         } catch (error) {
+    //         console.error('Error fetching user:', error);
+    //         }
+    //     };
     
-        fetchUser();
-    }, []);
+    //     fetchUser();
+    // }, []);
 
     const handleSubmit = async () => {
         try {
-            if (!user) {
-                return;
-            }
+            // if (!user) {
+            //     return;
+            // }
 
-            const db = getFirestore();
-            const betCollection = collection(db, 'tellers', user.uid, 'bets');
-            await addDoc(betCollection, {
-                address1: '<address1>',
-                address2: '<address2>',
-                amount: betAmount,
-                fight_number: '<fight_number>',
-                side: 'WALA',
-                timestamp: new Date(),
-                venue: '<venue>',
-            });
+            // const db = getFirestore();
+            // const betCollection = collection(db, 'tellers', user.uid, 'bets');
+            // await addDoc(betCollection, {
+            //     address1: '<address1>',
+            //     address2: '<address2>',
+            //     amount: betAmount,
+            //     fight_number: '<fight_number>',
+            //     side: 'WALA',
+            //     timestamp: new Date(),
+            //     venue: '<venue>',
+            // });
 
             console.log('Bet added successfully!');
             Alert.alert('WALA!', 'Your bet has been placed successfully!');

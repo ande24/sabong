@@ -28,24 +28,24 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
 
     const [betAmount, setBetAmount] = useState('0');
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-            const auth = getAuth();
-            const currentUser = auth.currentUser;
+    // useEffect(() => {
+    //     const fetchUser = async () => {
+    //         try {
+    //         const auth = getAuth();
+    //         const currentUser = auth.currentUser;
 
-            if (!currentUser) {
-                return;
-            }
+    //         if (!currentUser) {
+    //             return;
+    //         }
 
-            setUser(currentUser);
-            } catch (error) {
-            console.error('Error fetching user:', error);
-            }
-        };
+    //         setUser(currentUser);
+    //         } catch (error) {
+    //         console.error('Error fetching user:', error);
+    //         }
+    //     };
     
-        fetchUser();
-    }, []);
+    //     fetchUser();
+    // }, []);
 
     const handleSubmit = async () => {
         if (parseInt(betAmount) < 20) {
@@ -57,26 +57,26 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
             return;
         }
         try {
-            if (!user) {
-                return;
-            }
+            // if (!user) {
+            //     return;
+            // }
 
-            const db = getFirestore();
+            // const db = getFirestore();
 
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const collectionName = `bets_${year}_${month}`;
+            // const now = new Date();
+            // const year = now.getFullYear();
+            // const month = String(now.getMonth() + 1).padStart(2, '0');
+            // const collectionName = `bets_${year}_${month}`;
 
-            const betCollection = collection(db, 'tellers', user.uid, collectionName);
-            await addDoc(betCollection, {
-                amount: betAmount,
-                fight_number: '123',
-                side: 'MERON',
-                timestamp: new Date(),
-                outcome: 'PENDING',
-                odds: 1.57,
-            });
+            // const betCollection = collection(db, 'tellers', user.uid, collectionName);
+            // await addDoc(betCollection, {
+            //     amount: betAmount,
+            //     fight_number: '123',
+            //     side: 'MERON',
+            //     timestamp: new Date(),
+            //     outcome: 'PENDING',
+            //     odds: 1.57,
+            // });
 
             console.log('Bet added successfully!');
             Alert.alert('MERON!', 'Your bet has been placed successfully!');

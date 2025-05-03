@@ -1,0 +1,36 @@
+admin/operator:
+set match result (meron, wala, draw, cancelled)
+set upcoming fights and edit fight schedule/order
+adjust betting odds 
+display fight odds and outcome on tv
+view reports
+
+	- total bets accepted by each teller
+	- total bets and payout for each fight
+	- total bets, winnings, and revenue across ALL FIGHTS AND TELLERS
+
+teller:
+accept bets for meron, wala, draw
+print bet receipts thru bt printer
+do payouts
+	- verify result and payout amount of player by scanning qr on receipt (?)
+generate daily report (list of transactions + details per transaction)
+
+
+
+
+todo:
+bet validation (max, min, invalid number)
+bet submission
+print receipt w qr
+generate report contents
+fight display data
+fight config
+admin config
+
+
+
+optional:
+custom font
+styled alert components (react native paper)
+
