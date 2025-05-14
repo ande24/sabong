@@ -18,10 +18,9 @@ const StyledGradient = cssInterop(LinearGradient, {
 
 interface BetDrawProps {
     onClose: () => void;
-    onConfirm: () => void;
   }
 
-export const BetDraw: React.FC<BetDrawProps> = ({ onClose, onConfirm }) => {
+export const BetDraw: React.FC<BetDrawProps> = ({ onClose }) => {
     const [betAmount, setBetAmount] = useState('0');
 
     useEffect(() => {
@@ -180,7 +179,6 @@ export const BetDraw: React.FC<BetDrawProps> = ({ onClose, onConfirm }) => {
                         "DRAW!", 
                         `Your bet of ₱${betAmount} has been confirmed.`
                         ); 
-                        onConfirm();
                     }} 
                     className="bg-green-600 p-[2px] rounded-md mb-4 w-full"
                 >

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, Text, View, FlatList, StyleSheet, Dimensions } from 'react-native';
 import { getAuth, User } from 'firebase/auth';
-import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, Timestamp, query, where, doc, updateDoc } from 'firebase/firestore';
+import { getApp } from '@firebase/app';
 
 export const BetSummaryDaily = ({
   filterFight,
@@ -21,115 +22,223 @@ export const BetSummaryDaily = ({
 
   const [user, setUser] = useState<User | null>(null);
   const [bets, setBets] = useState<any[]>([]);
+  const [allBets, setAllBets] = useState<any[]>([]);
+  const [fights, setFights] = useState<any[]>([]);
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       const auth = getAuth();
-  //       const currentUser = auth.currentUser;
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
 
-  //       if (!currentUser) {
-  //         return;
-  //       }
+        if (!currentUser) {
+          return;
+        }
 
-  //       setUser(currentUser);
-  //     } catch (error) {
-  //       console.error('Error fetching user:', error);
-  //     }
-  //   };
+        setUser(currentUser);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
 
-  //   fetchUser();
-  // }, []);
+    fetchUser();
+  }, []);
 
-  // useEffect(() => {
-  //   const fetchBets = () => {
-  //     if (!user) {
-  //       return;
-  //     }
+  useEffect(() => {
+    const fetchBets = () => {
+      if (!user) {
+        return;
+      }
 
-  //     try {
-  //       const db = getFirestore();
+      try {
+        const db = getFirestore();
         
-  //       const now = new Date();
+        const now = new Date();
+        const utc8 = new Date(now.getTime() + 8 * 60 * 60 * 1000);
 
-  //       const year = now.getFullYear();
-  //       const month = String(now.getMonth() + 1).padStart(2, '0');
-  //       const collectionName = `bets_${year}_${month}`;
+        const year = utc8.getFullYear();
+        const month = String(utc8.getMonth() + 1).padStart(2, '0');
+        const collectionName = `bets_${year}_${month}`;
         
-  //       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  //       const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        const startOfDay = new Date(utc8.getFullYear(), utc8.getMonth(), utc8.getDate());
+        const endOfDay = new Date(utc8.getFullYear(), utc8.getMonth(), utc8.getDate() + 1);
+
+        console.log('Start of day:', startOfDay);
+        console.log('End of day:', endOfDay);
         
-  //       const betCollection = collection(db, 'tellers', user.uid, collectionName);
-  //       const unsubscribe = onSnapshot(betCollection, (betSnapshot) => {
-  //         let betList = betSnapshot.docs.map((doc) => {
-  //           const timestamp = doc.data().timestamp.toDate();
+        const betCollection = collection(db, 'tellers', user.uid, collectionName);
+        const unsubscribe = onSnapshot(betCollection, (betSnapshot) => {
+          let betList = betSnapshot.docs.map((doc) => {
+            const timestamp = doc.data().timestamp.toDate();
 
-  //           return {
-  //             id: doc.id,
-  //             address1: doc.data().address1,
-  //             address2: doc.data().address2,
-  //             amount: doc.data().amount,
-  //             fight_number: doc.data().fight_number,
-  //             side: doc.data().side,
-  //             timestamp: timestamp,
-  //             formattedDate: timestamp.toLocaleDateString('en-US', {
-  //               year: 'numeric',
-  //               month: 'long',
-  //               day: 'numeric',
-  //             }),
-  //             formattedTime: timestamp.toLocaleTimeString('en-US', {
-  //                 hour: 'numeric',
-  //                 minute: '2-digit',
-  //                 hour12: true,
-  //             }),
-  //             outcome: doc.data().outcome,
-  //             odds: doc.data().odds,
-  //           };
-  //         })
-  //         .filter((bet) => {
-  //           return bet.timestamp >= startOfDay && bet.timestamp < endOfDay;
-  //         });
+            return {
+              id: doc.id,
+              amount: doc.data().amount || 0,
+              fight_number: doc.data().fight_number || 0,
+              side: doc.data().side || "",
+              timestamp: timestamp,
+              formattedDate: timestamp.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
+              formattedTime: timestamp.toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+              }),
+              outcome: doc.data().outcome || "",
+              odds: doc.data().odds || 1,
+            };
+          })
+          .filter((bet) => {
+            return bet.timestamp >= startOfDay && bet.timestamp < endOfDay;
+          });
 
-  //         if (filterTime === 'desc') {
-  //           betList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  //         }
-  //         else {
-  //           betList.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-  //         }
+          console.log('Bets fetched:', betList);
 
-  //         if (filterFight === 'select') {
-  //           betList = betList.filter((bet) => bet.fight_number === selectedFight);
-  //         }
+          setAllBets(betList);
 
-  //         if (filterSide !== 'all') {
-  //           betList = betList.filter((bet) => bet.side === filterSide.toUpperCase());
-  //         }
+          if (filterTime === 'desc') {
+            betList.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+          }
+          else {
+            betList.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+          }
 
-  //         if (filterStatus !== 'all') {
-  //           betList = betList.filter(
-  //             (bet) =>
-  //               (filterStatus === 'pending' && bet.outcome === 'PENDING') ||
-  //               (filterStatus === 'completed' && bet.outcome.toUpperCase() !== 'PENDING')
-  //           );
-  //         }
+          if (filterFight === 'select') {
+            betList = betList.filter((bet) => String(bet.fight_number) === selectedFight);
+          }
 
-  //         setBets(betList);
-  //       });
+          if (filterSide !== 'all') {
+            betList = betList.filter((bet) => bet.side === filterSide.toUpperCase());
+          }
 
-  //       return unsubscribe;
-  //     } catch (error) {
-  //       console.error('Error fetching bets:', error);
-  //     }
-  //   };
+          if (filterStatus !== 'all') {
+            betList = betList.filter(
+              (bet) =>
+                (filterStatus === 'pending' && bet.outcome === 'PENDING') ||
+                (filterStatus === 'completed' && bet.outcome.toUpperCase() !== 'PENDING')
+            );
+          }
 
-  //   const unsubscribe = fetchBets();
+          setBets(betList);
 
-  //   return () => {
-  //     if (typeof unsubscribe === 'function') {
-  //       unsubscribe();
-  //     }
-  //   };
-  // }, [user, filterFight, selectedFight, filterTime, filterStatus, filterSide]);
+          console.log('Bets displayed:', betList);
+        });
+
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error fetching bets:', error);
+      }
+    };
+
+    let unsubscribe: () => void = () => {};
+
+    const fetchUnsubscribe = fetchBets();
+    if (typeof fetchUnsubscribe === 'function') {
+      unsubscribe = fetchUnsubscribe;
+    }
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user, filterFight, selectedFight, filterTime, filterStatus, filterSide]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    } 
+
+    const fetchFights = async () => {
+      try {
+        const app = getApp();
+        const db = getFirestore(app);
+
+        const now = new Date();
+        const utc8 = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+
+        const year = utc8.getFullYear();
+        const month = String(utc8.getMonth() + 1).padStart(2, '0');
+
+        const startOfDay = new Date(utc8.getFullYear(), utc8.getMonth(), utc8.getDate());
+        const endOfDay = new Date(utc8.getFullYear(), utc8.getMonth(), utc8.getDate() + 1);
+
+        const collectionName = `fights_${year}_${month}`;
+        const betCollectionName = `bets_${year}_${month}`;
+
+        const fightsCollection = collection(db, collectionName);
+        const unsubscribe = onSnapshot(fightsCollection, (querySnapshot) => { 
+          let fightList = querySnapshot.docs.map((doc) => {
+            return {
+              id: doc.id,
+              fight_number: doc.data().fight_number,
+              timestamp: doc.data().timestamp.toDate(),
+              meron_odds: doc.data().meron_odds,
+              wala_odds: doc.data().wala_odds,
+              draw_odds: doc.data().draw_odds,
+              outcome: doc.data().outcome,
+            };
+          })
+          .filter((fight) => {
+            return fight.timestamp >= startOfDay && fight.timestamp < endOfDay;
+          });
+
+          fightList.forEach(async (fight) => {
+            console.log('fight number:', fight.fight_number);
+            allBets.forEach(async (bet) => {
+              console.log('bet fight number:', bet.fight_number);
+              if (bet.fight_number === fight.fight_number) {
+                console.log('updating bet:', bet.id);
+                const betRef = doc(db, 'tellers', user.uid, betCollectionName, bet.id);
+                let odds = 0;
+
+                if (bet.side === 'MERON') {
+                  odds = fight.meron_odds;
+                }
+                else if (bet.side === 'WALA') {
+                  odds = fight.wala_odds;
+                }
+                else if (bet.side === 'DRAW') {
+                  odds = fight.draw_odds;
+                }
+
+                if (betRef) {
+                  try {
+                    await updateDoc(betRef, {
+                      outcome: fight.outcome,
+                      odds: odds,
+                    });
+                    console.log(`Updated bet ${bet.id} with outcome ${fight.outcome} and odds ${odds}`);
+                  } catch (error) {
+                    console.log(`Error updating bet ${bet.id}:`, error);
+                  }
+                }
+              }
+            });
+          });
+
+          console.log('Fights fetched:', fightList);
+          setFights(fightList);
+        });
+
+        return unsubscribe;
+      } catch (error) {
+        console.error("Error fetching fights:", error);
+      }
+    };
+
+    let unsubscribe: () => void = () => {};
+
+    const fetchUnsubscribe = fetchFights();
+    if (typeof fetchUnsubscribe === 'function') {
+      unsubscribe = fetchUnsubscribe;
+    }
+
+    return () => {
+      unsubscribe();
+    };
+  }, [bets, user]);
 
   const BetItem = React.memo(({ bet }: any) => (
     <View style={{ height: itemHeight }}>
@@ -195,6 +304,8 @@ export const BetSummaryDaily = ({
                     ? styles.colorWala
                     : bet.outcome === 'MERON'
                     ? styles.colorMeron
+                    : bet.outcome === 'CANCELLED'
+                    ? styles.colorCancelled
                     : styles.colorDraw,
               ]}
               >
@@ -328,6 +439,9 @@ const styles = StyleSheet.create({
   },
   colorPending : {
     backgroundColor: '#fbbf24',
+  },
+  colorCancelled: {
+    backgroundColor: '#000000',
   },
   value: {
     fontSize: 16,

@@ -110,15 +110,15 @@ export default function Home() {
   return (
     <View className="flex-1 pb-2 bg-zinc-950">
       <Modal onRequestClose={() => {setShowBetWala(false)}} animationType='slide' transparent={true} visible={showBetWala}>
-        <BetWala onClose={() => {setShowBetWala(false)}} onConfirm={() => {setShowBetWala(false)}}/>
+        <BetWala onClose={() => {setShowBetWala(false)}}/>
       </Modal>
 
       <Modal onRequestClose={() => {setShowBetMeron(false)}} animationType='slide' transparent={true} visible={showBetMeron}>
-        <BetMeron onClose={() => {setShowBetMeron(false)}} onConfirm={() => {setShowBetMeron(false)}}/>
+        <BetMeron onClose={() => {setShowBetMeron(false)}}/>
       </Modal>
 
       <Modal onRequestClose={() => {setShowBetDraw(false)}} animationType='slide' transparent={true} visible={showBetDraw}>
-        <BetDraw onClose={() => {setShowBetDraw(false)}} onConfirm={() => {setShowBetDraw(false)}}/>
+        <BetDraw onClose={() => {setShowBetDraw(false)}}/>
       </Modal>
 
       <View className="flex-1 flex justify-start items-center flex-col pt-10 px-2 bg-zinc-950">
@@ -135,12 +135,6 @@ export default function Home() {
               <Text className='text-white'>{user.email}</Text>
             </View>
           )}
-
-          {/* <View className=' bg-zinc-800 py-2 px-4 rounded-full border border-zinc-600 flex-row'>
-            <FeatherIcon name='bar-chart-2' size={18} color='#eab308'/>
-            <Text className='text-xl font-semibold text-white'>     150.00  </Text>
-            <MaterialIcon name='reload' size={18} color='#eab308'/>
-          </View> */}
           
         </View>
 
@@ -195,89 +189,64 @@ export default function Home() {
                     <View className='flex-1'>
                       <TouchableOpacity onPress={changeTime} className={`${styles.statusButton} bg-zinc-900 flex-row justify-center`}>
                         <Text className={`${styles.statusButtonText} ml-2`}>Time</Text>
-                        <View className={`${filterTime === 'asc' ? "block" : "hidden"}`}>
-                          <MaterialIcon name='arrow-up-thin' size={16} color='white'/>
-                        </View>
-                        <View className={`${filterTime === 'desc' ? "block" : "hidden"}`}>
-                          <MaterialIcon name='arrow-down-thin' size={16} color='white'/>
-                        </View>
+                        {filterTime === 'asc' ? (
+                          <MaterialIcon name='arrow-up-thin' size={18} color='white'/>
+                        ) : (
+                          <MaterialIcon name='arrow-down-thin' size={18} color='white'/>
+                        )}
                       </TouchableOpacity>
                     </View>
                     
                     <View className='flex-1'>
                       <TouchableOpacity onPress={changeSide} className={`${styles.statusButton} ${filterSide === "meron" ? "bg-red-600" : filterSide === "wala" ? "bg-blue-600" : filterSide === "draw" ? "bg-green-600" : "bg-zinc-900"}`}>
-                        <Text className={`${styles.statusButtonText} ${filterSide === "all" ? "block" : "hidden"}`}>Side</Text>
-                        <Text className={`${styles.statusButtonText} ${filterSide === "meron" ? "block" : "hidden"}`}>MERON</Text>
-                        <Text className={`${styles.statusButtonText} ${filterSide === "wala" ? "block" : "hidden"}`}>WALA</Text>
-                        <Text className={`${styles.statusButtonText} ${filterSide === "draw" ? "block" : "hidden"}`}>DRAW</Text>
+                        <Text className={styles.statusButtonText}>{
+                          filterSide === "all" ? 
+                                          "Side" : 
+                          filterSide === "meron" ? 
+                                          "MERON" : 
+                          filterSide === "wala" ? 
+                                          "WALA" : 
+                                          "DRAW"}
+                        </Text>
                       </TouchableOpacity>
                     </View>
 
                     <View className='flex-1'>
                       <TouchableOpacity onPress={changeStatus} className={`${styles.statusButton} ${filterStatus === "completed" ? "bg-green-600" : filterStatus === "pending" ? "bg-yellow-600"  : "bg-zinc-900"}`}>
-                        <Text className={`${styles.statusButtonText} ${filterStatus === "all" ? "block" : "hidden"}`}>Status</Text>
-                        <Text className={`${styles.statusButtonText} ${filterStatus === "completed" ? "block" : "hidden"}`}>Completed</Text>
-                        <Text className={`${styles.statusButtonText} ${filterStatus === "pending" ? "block" : "hidden"}`}>Pending</Text>
+                        <Text className={styles.statusButtonText}>
+                          {filterStatus === "all" ? 
+                                          "Status" : 
+                          filterStatus === "completed" ? 
+                                          "FINISHED" :
+                                          "PENDING"}
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   </View>
                 </View>
                 
                 <View className='flex w-full flex-1'>
-                  <TouchableOpacity className={`${styles.button} flex-1 flex-row w-full bg-zinc-600 rounded-md`}>
-                    <StyledGradient
-                      colors={['#27272a', '#52525b']}
-                      start={{ x: 0, y: 1 }}
-                      end={{ x: 0, y: 0 }}
-                      className=" h-full w-full flex-row items-center justify-center rounded-md"
-                    >
-                      <MaterialIcon name='calendar-today' size={22} color='white'/>
-                      <Text className={styles.buttonText}> TODAY'S REPORT</Text>
-                    </StyledGradient>
-                  </TouchableOpacity> 
+                  <TouchableOpacity onPress={() => {setShowScan(true)}} className={`${styles.button} flex-1 flex-row bg-zinc-950 border border-zinc-600 rounded-md`}>
+                    <MaterialIcon name='qrcode-scan' size={18} color='white'/>
+                    <Text className='hidden 3xs:block'> </Text>
+                    <Text className={styles.buttonText}>  PAYOUT SCAN</Text>
+                  </TouchableOpacity>
                 </View>
-
-            {/* <View className='flex-row w-full gap-x-1 flex-1'>
-                <TouchableOpacity className={`${styles.button} flex-1 flex-row bg-blue-600 rounded-md`}>
-                  <StyledGradient
-                    colors={['#1d4ed8', '#3b82f6']}
-                    start={{ x: 0, y: 1 }}
-                    end={{ x: 0, y: 0 }}
-                    className=" h-full w-full flex-row items-center justify-center rounded-md"
-                  >
-                    <MaterialIcon name='cash-plus' size={26} color='white'/>
-                    <Text className={styles.buttonText}>  CASH IN</Text>
-                  </StyledGradient>
-                  
-                </TouchableOpacity>
-                
-                <TouchableOpacity className={`${styles.button} flex-1 flex-row bg-red-600 rounded-md`}>
-                  <StyledGradient
-                    colors={['#b91c1c', '#ef4444']}
-                    start={{ x: 0, y: 1 }}
-                    end={{ x: 0, y: 0 }}
-                    className=" h-full w-full flex-row items-center justify-center rounded-md"
-                  >
-                    <MaterialIcon name='cash-minus' size={26} color='white'/>
-                    <Text className={styles.buttonText}>  CASH OUT</Text>
-                  </StyledGradient>
-                </TouchableOpacity>
-              </View>  */}
           </View>
         )}
 
         <View className='flex-row w-full gap-x-1 flex-[13]'>
-          <TouchableOpacity onPress={() => {setShowScan(true)}} className={`${styles.button} flex-1 flex-row bg-zinc-950 border border-zinc-600 rounded-md`}>
-            <MaterialIcon name='qrcode-scan' size={18} color='white'/>
-            <Text className='hidden 3xs:block'> </Text>
-            <Text className={styles.buttonText}>  PAYOUT SCAN</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity onPress={() => setShowScan(false)} className={`flex justify-center items-center flex-1 flex-row bg-zinc-950 border border-zinc-600 rounded-md`}>
-            <MaterialIcon name='scan-helper' size={18} color='white'/>
-            <Text className='hidden 3xs:block'> </Text>
-            <Text className="text-white text-center font-semibold text-2xl">  CANCEL SCAN</Text>
-          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setShowScan(false)} className={`${styles.button} flex-1 flex-row w-full bg-zinc-600 rounded-md`}>
+            <StyledGradient
+              colors={['#27272a', '#52525b']}
+              start={{ x: 0, y: 1 }}
+              end={{ x: 0, y: 0 }}
+              className=" h-full w-full flex-row items-center justify-center rounded-md"
+            >
+              <MaterialIcon name='calendar-today' size={22} color='white'/>
+              <Text className={styles.buttonText}> TODAY'S REPORT</Text>
+            </StyledGradient>
+          </TouchableOpacity> 
         </View> 
       </View>
     </View>

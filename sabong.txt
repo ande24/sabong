@@ -20,13 +20,13 @@ generate daily report (list of transactions + details per transaction)
 
 
 todo:
-bet validation (max, min, invalid number)
-bet submission
+bet clone
 print receipt w qr
 generate report contents
-fight display data
+fight display total
 fight config
 admin config
+fight timestamp timezone
 
 
 

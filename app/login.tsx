@@ -14,30 +14,30 @@ export default function Login () {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    // AUTO LOGIN FOR TESTING PURPOSES
-    // useEffect(() => {
-    //     const autoLogin = async () => {
-    //         setEmail("andeellenes@gmail.com")
-    //         setPassword("password");
+    //AUTO LOGIN FOR TESTING PURPOSES
+    useEffect(() => {
+        const autoLogin = async () => {
+            setEmail("andeellenes@gmail.com")
+            setPassword("password");
 
-    //         await SignIn({ email, password });
-    //         router.push("/home");
-    //     }
+            await SignIn({ email, password });
+            router.push("/home");
+        }
         
-    //     autoLogin();
-    // }, []);
+        autoLogin();
+    }, []);
 
     const handleLogin = async () => {
-        // if (email === "" || password === "") {
-        //     Alert.alert("Error", "Please fill in all fields.");
-        //     return;
-        // }
+        if (email === "" || password === "") {
+            Alert.alert("Error", "Please fill in all fields.");
+            return;
+        }
 
-        // const res = await SignIn({ email, password });
-        // if (res.err) {
-        //     Alert.alert("Error", "Login failed. Please check your credentials.");
-        //     return;
-        // }
+        const res = await SignIn({ email, password });
+        if (res.err) {
+            Alert.alert("Error", "Login failed. Please check your credentials.");
+            return;
+        }
         Alert.alert("Success", "Login successful!");
         router.push("/home");
     }

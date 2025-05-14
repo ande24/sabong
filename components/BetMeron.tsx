@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
   Alert,
+  Image,
 } from 'react-native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -12,7 +13,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { cssInterop } from 'nativewind';
 
 import { getAuth, User } from 'firebase/auth';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, onSnapshot, where, query, Timestamp, getDoc, updateDoc } from 'firebase/firestore';
+import { getApp } from '@firebase/app';
+
+import QRCode from 'react-native-qrcode-svg';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+
 
 const StyledGradient = cssInterop(LinearGradient, {
   className: 'style'
@@ -20,75 +27,218 @@ const StyledGradient = cssInterop(LinearGradient, {
 
 interface BetMeronProps {
     onClose: () => void;
-    onConfirm: () => void;
   }
 
-export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
+export const BetMeron: React.FC<BetMeronProps> = ({ onClose }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [showqr, setShowQR] = useState(false);
 
     const [betAmount, setBetAmount] = useState('0');
+    const [fightData, setFightData] = useState({
+        fight_id: '',
+        current_fight: '',
+        meron_max: 0,
+        meron_min: 0,
+        meron_total: 0,
+        meron_odds: 0,
+    });
 
-    // useEffect(() => {
-    //     const fetchUser = async () => {
-    //         try {
-    //         const auth = getAuth();
-    //         const currentUser = auth.currentUser;
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+            const auth = getAuth();
+            const currentUser = auth.currentUser;
 
-    //         if (!currentUser) {
-    //             return;
-    //         }
+            if (!currentUser) {
+                return;
+            }
 
-    //         setUser(currentUser);
-    //         } catch (error) {
-    //         console.error('Error fetching user:', error);
-    //         }
-    //     };
+            setUser(currentUser);
+            } catch (error) {
+            console.error('Error fetching user:', error);
+            }
+        };
     
-    //     fetchUser();
-    // }, []);
+        fetchUser();
+    }, []);
+
+    useEffect(() => {
+        const fetchFightData = async () => {
+            try {
+            const app = getApp();
+            const db = getFirestore(app);
+            const configRef = doc(db, 'admin', 'config'); 
+
+            const unsubscribe = onSnapshot(configRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                const data = docSnapshot.data();
+                setFightData({
+                    ...fightData,
+                    current_fight: data.current_fight || '',
+                    meron_max: data.meron_max || 0,
+                    meron_min: data.meron_min || 0,
+                    meron_total: data.meron_total || 0,
+                    meron_odds: data.meron_odds || 0,
+                });
+                } else {
+                console.log('Config not found!');
+                }
+            });
+
+            return () => unsubscribe();
+            } catch (error) {
+            console.error('Error fetching config:', error);
+            }
+        };
+
+        fetchFightData();
+    }, []);
+
+    useEffect(() => {
+        let unsubscribe: () => void; 
+    
+        const fetchFightDetails = async () => {
+          if (!fightData.current_fight) return;
+    
+          try {
+            const app = getApp();
+            const db = getFirestore(app);
+    
+            const now = new Date();
+            const utc8 = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    
+            const year = utc8.getFullYear();
+            const month = String(utc8.getMonth() + 1).padStart(2, '0');
+    
+            const startOfDay = new Date(utc8.getFullYear(), utc8.getMonth(), utc8.getDate());
+            const endOfDay = new Date(utc8.getFullYear(), utc8.getMonth(), utc8.getDate() + 1);
+    
+            const startTimestamp = Timestamp.fromDate(startOfDay);
+            const endTimestamp = Timestamp.fromDate(endOfDay);
+    
+            const collectionName = `fights_${year}_${month}`;
+    
+            const fightsCollection = collection(db, collectionName);
+            const q = query(
+              fightsCollection,
+              where("timestamp", ">=", startTimestamp),
+              where("timestamp", "<", endTimestamp)
+            );
+    
+            unsubscribe = onSnapshot(q, (querySnapshot) => { 
+              if (!querySnapshot.empty) {
+                
+                const filteredDocs = querySnapshot.docs.filter(doc => doc.data().fight_number === fightData.current_fight);
+    
+                if (filteredDocs.length > 0) {
+                  const data = filteredDocs[0].data();
+                  setFightData(prevState => ({
+                    ...prevState,
+                    fight_id: filteredDocs[0].id || '',
+                    current_fight: data.fight_number || '',
+                    meron_total: data.meron_total || 0,
+                    meron_max: data.meron_max || 0,
+                    meron_min: data.meron_min || 0,
+                    meron_odds: data.meron_odds || 0,
+                  }));
+                } else {
+                  console.log(`No fight found today with fight_number: ${fightData.current_fight}`);
+                  
+                }
+              } else {
+                console.log(`No fights found for today`);
+              }
+            }, (error) => {
+              console.error("Error fetching fight details:", error);
+            });
+          } catch (error) {
+            console.error("Error fetching fight details:", error);
+          }
+        };
+    
+        fetchFightDetails();
+    
+        return () => {
+          if (unsubscribe) {
+            unsubscribe(); 
+          }
+        };
+    }, [fightData.current_fight]);
 
     const handleSubmit = async () => {
-        if (parseInt(betAmount) < 20) {
-            Alert.alert('Invalid Bet', 'Minimum bet amount is 20.');
+        if (parseInt(betAmount) < fightData.meron_min) {
+            Alert.alert('Invalid Bet', `Minimum bet amount is ₱${formatNumber(fightData.meron_min)}.`);
             return;
         }
-        if (parseInt(betAmount) > 5000) {
-            Alert.alert('Invalid Bet', 'Maximum bet amount is 5000.');
+        if (parseInt(betAmount) > fightData.meron_max) {
+            Alert.alert('Invalid Bet', `Maximum bet amount is ₱${formatNumber(fightData.meron_max)}.`);
             return;
         }
         try {
-            // if (!user) {
-            //     return;
-            // }
+            if (!user) {
+                return;
+            }
 
-            // const db = getFirestore();
+            const db = getFirestore();
 
-            // const now = new Date();
-            // const year = now.getFullYear();
-            // const month = String(now.getMonth() + 1).padStart(2, '0');
-            // const collectionName = `bets_${year}_${month}`;
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const collectionName = `bets_${year}_${month}`;
 
-            // const betCollection = collection(db, 'tellers', user.uid, collectionName);
-            // await addDoc(betCollection, {
-            //     amount: betAmount,
-            //     fight_number: '123',
-            //     side: 'MERON',
-            //     timestamp: new Date(),
-            //     outcome: 'PENDING',
-            //     odds: 1.57,
-            // });
+            const betCollection = collection(db, 'tellers', user.uid, collectionName);
+            await addDoc(betCollection, {
+                amount: Number(betAmount),
+                fight_number: fightData.current_fight,
+                side: 'MERON',
+                timestamp: new Date(now.getTime() + 8 * 60 * 60 * 1000),
+                outcome: 'PENDING',
+                odds: 0, 
+                fight_id: fightData.fight_id,
+            });
 
-            console.log('Bet added successfully!');
-            Alert.alert('MERON!', 'Your bet has been placed successfully!');
-            onClose();
+            const fightsCollectionName = `fights_${year}_${month}`;
+
+            const fightDocRef = doc(db, fightsCollectionName, fightData.fight_id);
+            const fightDocSnapshot = await getDoc(fightDocRef);
+
+            if (fightDocSnapshot.exists()) {
+                const fightDocData = fightDocSnapshot.data();
+                console.log('Fight Document Data:', fightDocData);
+
+                const updatedMeronTotal = (fightDocData.meron_total || 0) + Number(betAmount);
+                await updateDoc(fightDocRef, {
+                    meron_total: updatedMeronTotal,
+                });
+                console.log('Fight document updated with new meron_total:', updatedMeronTotal);
+            } else {
+                console.log('No fight document found with the given ID.');
+            }
+             
+
+            // console.log('Bet added successfully!');
+            // Alert.alert('MERON!', 'Your bet has been placed successfully!');
+            setShowQR(true);
         } catch (error) {
             console.error('Error adding bet:', error);
         }
     }
 
+    const formatNumber = (number: number): string => {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+
     return (
         <View className="flex-1 bg-black/80 justify-center items-center">
           <View className="w-11/12 bg-zinc-800 rounded-2xl">
+
+            <View>
+                {showqr && (
+                    <QRCode
+                        value={`fight_number=${fightData.fight_id},timestamp=${new Date().toISOString()}`}
+                    />
+                )}
+            </View>
 
             <View className="rounded-t-2xl w-full">
                 <StyledGradient
@@ -113,13 +263,13 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
             >
                 <View className="flex-row justify-between w-full mb-2 py-4">
                     <View className='flex-row items-center justify-center gap-x-4'>
-                        <Text className="text-white text-lg">Min: 20</Text>
-                        <Text className="text-white text-lg">Max: 5,000</Text>
+                        <Text className="text-white text-lg">Min: ₱{formatNumber(fightData.meron_min)}</Text>
+                        <Text className="text-white text-lg">Max: ₱{formatNumber(fightData.meron_max)}</Text>
                     </View>
 
-                    <View className='flex-row items-center justify-between gap-x-4 px-3 py-1 border border-zinc-600 rounded-md'>
-                        <Text className='text-white font-semibold text-lg'>Total</Text>
-                        <Text className='text-yellow-500 font-semibold text-lg'>0</Text>
+                    <View className='flex-row items-center justify-between gap-x-2 px-3 py-1 border border-zinc-600 rounded-md'>
+                        <Text className='text-white font-semibold text-lg'>Total:</Text>
+                        <Text className='text-yellow-500 font-semibold text-lg'>₱{formatNumber(fightData.meron_total)}</Text>
                     </View>
                 </View>
 
@@ -128,7 +278,7 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
                         className="bg-blue-600 rounded-l-md flex-[2] h-full flex items-center justify-center"
                         onPress={() =>
                         setBetAmount((prev) =>
-                            Math.max(20, parseInt(prev) - 1).toString()
+                            Math.max(fightData.meron_min, parseInt(prev) - 1).toString()
                         )
                         }
                     >
@@ -144,7 +294,7 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
 
                     <TextInput
                         className="bg-white text-center text-4xl font-bold flex-[7] h-full"
-                        value={betAmount}
+                        value={formatNumber(Number(betAmount))}
                         keyboardType="numeric"
                         onChangeText={(text) => setBetAmount(text)}
                         textAlignVertical='center'
@@ -154,7 +304,7 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
                         className="bg-blue-600 rounded-r-md flex-[2] h-full flex items-center justify-center"
                             onPress={() =>
                             setBetAmount((prev) =>
-                                Math.min(5000, parseInt(prev) + 1).toString()
+                                Math.min(fightData.meron_max, parseInt(prev) + 1).toString()
                             )
                         }
                     >
@@ -218,7 +368,7 @@ export const BetMeron: React.FC<BetMeronProps> = ({ onClose, onConfirm }) => {
                     onPress={() => setBetAmount(amount.toString())}
                     >
                     <MaterialIcon name="ticket-confirmation-outline" size={24} color="white" />
-                    <Text className="text-white text-3xl">{amount}</Text>
+                    <Text className="text-white text-3xl">{formatNumber(amount)}</Text>
                     </TouchableOpacity>
                 ))}
                 </View>

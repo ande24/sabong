@@ -22,28 +22,29 @@ export const Scanner = () => {
 
   const handleScan = ({ type, data }: BarcodeScanningResult) => {
     setScanned(true);
-    console.log("type: ", type);
-    console.log("data: ", data);
+    console.log('type: ', type);
+    console.log('data: ', data);
     alert(`Scanned type: ${type}\nData: ${data}`);
-  }
+  };
 
   return (
     <View style={styles.container}>
-      <View className='absolute z-10 top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-transparent'>
-        <View className='flex-1 justify-center items-center opacity-30'>
-          <Icon name='scan-outline' size={350} color='white'/>
+      <View className="absolute bottom-0 left-0 right-0 top-0 z-10 flex items-center justify-center bg-transparent">
+        <View className="flex-1 items-center justify-center opacity-30">
+          <Icon name="scan-outline" size={350} color="white" />
         </View>
       </View>
-      <CameraView 
-        onBarcodeScanned={scanned ? undefined : handleScan}  
+      <CameraView
+        onBarcodeScanned={scanned ? undefined : handleScan}
         barcodeScannerSettings={{
-            barcodeTypes: ["qr"],
+          barcodeTypes: ['qr'],
         }}
-        style={styles.camera} facing={'back'} 
+        style={styles.camera}
+        facing="back"
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
