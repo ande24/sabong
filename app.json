@@ -36,6 +36,14 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.sabongapp"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "b54d426d-dfdf-42b6-9673-744e18979c3c"
+      }
     }
   }
 }
