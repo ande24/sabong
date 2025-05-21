@@ -83,7 +83,7 @@ export default function LoginPage() {
         <div className=" bg-white w-xl px-20 h-5/9 shadow-xl shadow-black -skew-x-20 absolute right-100 flex justify-center items-center z-30">
             <div className="skew-x-20 mr-5">
                 <div className="flex items-center justify-center gap-8 mb-8">
-                    <span className="text-5xl text-black text-center">
+                    <span className="text-5xl ml-22 text-black text-center font-[Orbitron] font-semibold tracking-wide">
                     Sign In
                     </span>
                 </div>

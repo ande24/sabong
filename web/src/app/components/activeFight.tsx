@@ -3,6 +3,9 @@
 import { useState } from "react";
 
 export default function ActiveFight() {
+  const [meronOdds, setMeronOdds] = useState(1);
+  const [walaOdds, setWalaOdds] = useState(8);q
+  const [drawOdds, setDrawOdds] = useState(1);
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -15,11 +18,14 @@ export default function ActiveFight() {
         <div className="flex-1 flex flex-col items-center">
           <span className="text-xl font-bold tracking-widest mb-1">ODDS</span>
           <div className="flex w-[340px] h-12 rounded-full overflow-hidden shadow-lg">
-            <div className="flex-[1.75] bg-gradient-to-t from-red-700 to-red-500 flex items-center justify-center">
-              <span className="text-white text-lg font-bold">1.75</span>
+            <div style={{ flex: meronOdds}} className={`flex-[${meronOdds}] bg-gradient-to-t from-red-700 to-red-500 flex items-center justify-center`}>
+              <span className="text-white text-lg font-bold">{meronOdds}</span>
             </div>
-            <div className="flex-[2.7] bg-gradient-to-t from-blue-700 to-blue-500 flex items-center justify-center">
-              <span className="text-white text-lg font-bold">2.7</span>
+            <div style={{ flex: drawOdds}} className={`bg-gradient-to-t from-green-700 to-green-500 flex items-center justify-center`}>
+              <span className="text-white text-lg font-bold">{drawOdds}</span>
+            </div>
+            <div style={{ flex: walaOdds}} className={`bg-gradient-to-t from-blue-700 to-blue-500 flex items-center justify-center`}>
+              <span className="text-white text-lg font-bold">{walaOdds}</span>
             </div>
           </div>
           <div className="flex gap-12 mt-1 text-base text-black font-bold">
