@@ -9,6 +9,10 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+/mobile/node_modules
+/web/node_modules
+.expo/
+
 
 .env.local
 
