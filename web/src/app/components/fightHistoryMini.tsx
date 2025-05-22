@@ -34,12 +34,12 @@ export default function FightHistoryMini() {
                 className="bg-gradient-to-b from-yellow-200 via-yellow-300 to-yellow-400 rounded-xl shadow p-4 flex flex-col items-center justify-center gap-x-8"
             >
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold tracking-widest drop-shadow">🏁 END OF FIGHTS 🏁</span>
+                    <span className="text-3xl font-bold tracking-widest drop-shadow">⬇️ START OF FIGHTS ⬇️</span>
                 </div>
                 
             </span>
 
-            {fights.map((fight) => (
+            {fights.reverse().map((fight) => (
                 <span
                     key={fight.id}
                     className="bg-gradient-to-b from-white to-gray-300 rounded-xl shadow p-4 flex flex-col items-center justify-center gap-x-8"
@@ -64,10 +64,12 @@ export default function FightHistoryMini() {
                 className="bg-gradient-to-b from-yellow-200 via-yellow-300 to-yellow-400 rounded-xl shadow p-4 flex flex-col items-center justify-center gap-x-8"
             >
                 <div className="flex-1 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold tracking-widest drop-shadow">⬆️ START OF FIGHTS ⬆️</span>
+                    <span className="text-3xl font-bold tracking-widest drop-shadow">🏁 END OF FIGHTS 🏁</span>
                 </div>
                 
             </span>
+
+            
         </div>
     );
 }
