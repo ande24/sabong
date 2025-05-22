@@ -2,12 +2,12 @@
 
 import { CircleUser, Menu } from "lucide-react";
 
-export default function Navbar({ onOpen}: { onOpen: () => void }) {
+export default function Navbar({ onOpen }: { onOpen: () => void }) {
   return (
     <nav className="w-full h-24 flex items-center justify-between px-8 py-6 bg-gradient-to-b from-red-950 via-red-900 to-red-800 shadow z-30">
       <div className="flex flex-col items-start justify-center">
         <span className="text-white text-4xl font-semibold select-none">Cockpit System</span>
-        <span className="text-white mt-1 text-[10px] select-none">by Apexel Development</span>
+        <span className="text-gray-300 mt-2 text-[9px] select-none">© Apexel Development 2025</span>
       </div>
       
       <div className="flex items-center justify-center" onMouseEnter={() => onOpen()}>

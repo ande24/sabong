@@ -20,17 +20,11 @@ generate daily report (list of transactions + details per transaction)
 
 
 todo:
-bet clone
 print receipt w qr
-generate report contents
-fight display total
-fight config
-admin config
-fight timestamp timezone
-
-
+hd images
 
 optional:
 custom font
+
 styled alert components (react native paper)
 

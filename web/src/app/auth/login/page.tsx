@@ -32,8 +32,6 @@ export default function LoginPage() {
             }, 2000);
         }
         else {
-            setEmail("");
-            setPassword("");    
             setShowError(true);
             setTimeout(() => {
                 setShowError(false);
@@ -42,7 +40,7 @@ export default function LoginPage() {
     }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden font-orbitron tracking-widest">
       <Image
         src="/auth/bg.png" 
         alt="Background"
@@ -109,16 +107,16 @@ export default function LoginPage() {
                         <input type="checkbox" className="mr-1" />
                         Remember Me
                     </label>
-                    <a
+                    {/* <a
                         href="#"
                         className="text-sm text-blue-600 hover:underline"
                     >
                         Forgot Password?
-                    </a>
+                    </a> */}
                     </div>
                     <button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-2 rounded transition"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-semibold py-2 rounded transition"
                     >
                     Login
                     </button>
@@ -129,7 +127,7 @@ export default function LoginPage() {
                     )}
                     {showError && (
                         <p className="text-sm text-center mt-4 text-red-500">
-                            Invalid email or password!
+                            Invalid credentials, please try again.
                         </p>
                     )}
                     {!showSuccess && !showError && (

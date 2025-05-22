@@ -1,13 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import ActiveFight from "../components/activeFight";
-import AdminControls from "../components/adminControls";
 import Navbar from "../components/navbar";
 import { useState } from "react";
 import Menu from "../components/menu";
+import FightHistory from "../components/fightHistory";
 
-export default function Dashboard() {
+export default function History() {
     const [showMenu, setShowMenu] = useState(false);
 
   return (
@@ -43,25 +42,15 @@ export default function Dashboard() {
         </div>
         <div className="w-full flex flex-1 px-50 relative">
             <div onMouseLeave={() => {setShowMenu(false)}} className={`flex flex-col items-center justify-start bg-gradient-to-b rounded-bl-xl from-gray-600 to-gray-800 absolute top-0 right-0 z-40 w-64 shadow-xl  border-t-4 border-red-900 ${showMenu ? "translate-x-0" : "translate-x-full"} transition-transform duration-300 ease-in-out`}> 
-              <Menu currPage={'dashboard'}/>
+              <Menu currPage="history"/>
             </div>
-
             <div className="z-20 w-full px-8 py-8 flex-1 flex flex-col items-center justify-start bg-gradient-to-b from-blue-900 to-blue-950">
                 <div className="w-full">
-                    <span className="block text-4xl font-semibold text-white tracking-widest mb-6 text-center">
-                        ACTIVE FIGHT
-                    </span>
-                    <div className="w-full flex items-center justify-center bg-gradient-to-b from-white via-white to-gray-400 rounded-xl shadow-lg p-6 mb-8">
-                        <ActiveFight currentFight={5}/>
-                    </div>
-                </div>
-
-                <div className=" w-full">
-                    <span className="block text-4xl font-semibold text-white tracking-widest mb-6 text-center">
-                        ADMIN CONTROLS
+                    <span className="block text-5xl font-semibold text-white tracking-widest mb-6 text-center">
+                        FIGHT HISTORY
                     </span>
                     <div className="w-full flex items-center justify-center">
-                        <AdminControls currentFight={5}/>
+                        <FightHistory />
                     </div>
                 </div>
             </div>

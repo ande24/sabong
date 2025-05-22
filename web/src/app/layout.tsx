@@ -1,4 +1,4 @@
-import { Orbitron } from "next/font/google";
+import { Orbitron  } from "next/font/google";
 import "./globals.css";
 
 
@@ -8,6 +8,7 @@ const orbitron = Orbitron({
   display: "swap",
   weight: ["400", "600", "700", "800"],
 });
+
 
 export default function RootLayout({
   children,

@@ -6,8 +6,32 @@
   --font-orbitron: var(--font-orbitron);
 }
 
+@keyframes message {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-message {
+  display: inline-block;
+  white-space: nowrap;
+  animation: message 1200s linear infinite;
+}
+
+@keyframes history {
+  0% { transform: translateY(-90%); }
+  100% { transform: translateY(0%); }
+}
+
+.animate-history {
+  display: inline-block;
+  white-space: nowrap;
+  animation: history 20s linear infinite;
+}
+
 button {
   cursor: pointer;
-  @apply hover:scale-103;
+  @apply hover:scale-102 transition-all;
 }
+
+
 
