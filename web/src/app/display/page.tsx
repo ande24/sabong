@@ -4,21 +4,19 @@ import { useEffect, useState } from "react";
 import { db } from "@/firebase/config";
 import { collection, onSnapshot, doc } from "firebase/firestore";
 import Image from "next/image";
-import ActiveFight from "../components/activeFight";
-import AdminControls from "../components/adminControls";
 import Message from "../components/message";
 import FightHistoryMini from "../components/fightHistoryMini";
 
 export default function Display() {
     const [showDisplay, setShowDisplay] = useState(false);
-    const [showMenu, setShowMenu] = useState(false);
 
 
 
     useEffect(() => {
         const adminRef = collection(db, "admin");
         const unsubscribe = onSnapshot(doc(adminRef, 'config'), (snapshot) => {
-            snapshot.exists() && setShowDisplay(snapshot.data().showDisplay);
+            snapshot.exists() && setShowDisplay(snapshot.data().show_display);
+            snapshot.exists() && console.log("Display status: ", snapshot.data().show_display);
         }, (error) => {
             console.error("Error fetching admin data: ", error);
             setShowDisplay(false);

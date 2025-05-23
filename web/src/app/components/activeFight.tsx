@@ -1,22 +1,78 @@
 "use client";
 
-import { useState } from "react";
+import { db } from "@/firebase/config";
+import { collection, doc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
-export default function ActiveFight( {currentFight } : { currentFight: number }) {
-  const [meronOdds, setMeronOdds] = useState(1.5)
-  const [walaOdds, setWalaOdds] = useState(4);
-  const [drawOdds, setDrawOdds] = useState(8);
-
-  const [meronTotal, setMeronTotal] = useState(2000);
-  const [walaTotal, setWalaTotal] = useState(3500); 
-  const [drawTotal, setDrawTotal] = useState(7000);
-
-  const [fightStatus, setFightStatus] = useState("STANDBY");
-  const [selectedOutcome, setSelectedOutcome] = useState("PENDING");
+export default function ActiveFight() {
   const [pendingOutcome, setPendingOutcome] = useState("");
 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
+  const [adminConfig, setAdminConfig] = useState<any | null>(null);
+  const [fightData, setFightData] = useState<any | null>(null);
+
+
   
+  useEffect(() => {
+    const configRef = doc(db, "admin", "config");
+    const unsubscribe = onSnapshot(configRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setAdminConfig(snapshot.data());
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+
+
+  useEffect(() => {
+    if (!adminConfig) return;
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const collectionName = `fights_${year}_${month}`;
+
+    const fightsRef = collection(db, collectionName);
+    const q = query(
+      fightsRef,
+      where("fight_number", "==", adminConfig.current_fight),
+      where("game_number", "==", adminConfig.current_game)
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        const fight = querySnapshot.docs[0].data();
+        setFightData({
+          ...fight,
+          id: querySnapshot.docs[0].id,
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, [adminConfig]);
+
+
+
+  async function updateFightData(updates: Array<[string, any]>): Promise<void> {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const collectionName = `fights_${year}_${month}`;
+
+    const fightsRef = collection(db, collectionName);
+
+    const docRef = doc(fightsRef, fightData.id);
+    const updateObj: Record<string, any> = {};
+    updates.forEach(([field, value]) => {
+        updateObj[field] = value;
+    });
+    await updateDoc(docRef, updateObj);
+  }
+
 
 
   const confirmOutcome = (outcome: string) => {
@@ -27,15 +83,16 @@ export default function ActiveFight( {currentFight } : { currentFight: number })
 
 
   const handleConfirm = () => {
-    console.log(`Outcome set to: ${pendingOutcome}`);
-    setSelectedOutcome(pendingOutcome);
+    updateFightData([["outcome", pendingOutcome]]);
     setShowConfirmationModal(false);
 
     if (pendingOutcome === "RESET") {
-      setFightStatus("STANDBY");
-      setSelectedOutcome("PENDING");
+      updateFightData([
+        ["outcome", "PENDING"],
+        ["status", "STANDBY"],
+      ]);
     } else {
-      setFightStatus("CLOSED");
+      updateFightData([["status", "CLOSED"]]);  
     }
   };
 
@@ -48,14 +105,14 @@ export default function ActiveFight( {currentFight } : { currentFight: number })
 
 
   const changeFightStatus = () => {
-    if (fightStatus === "OPEN") {
-      setFightStatus("CLOSED");
+    if (fightData.status === "OPEN") {
+      updateFightData([["status", "CLOSED"]]);
     }
-    else if (fightStatus === "CLOSED") {
-      setFightStatus("STANDBY");
+    else if (fightData.status === "CLOSED") {
+      updateFightData([["status", "STANDBY"]]);
     }
     else {
-      setFightStatus("OPEN");
+      updateFightData([["status", "OPEN"]]);
     }
   }
 
@@ -66,41 +123,39 @@ export default function ActiveFight( {currentFight } : { currentFight: number })
     return str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
+  
 
+  if (!adminConfig || !fightData) {
+    return null;
+  }
 
   return (
     <div className={`w-full flex flex-col gap-6`}>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex-1">
-          <span className="text-2xl font-bold tracking-widest">FIGHT #{currentFight}</span>
+        <div className="flex-1 flex-col items-start justify-center gap-y-2">
+          <div className="text-2xl font-bold tracking-widest">FIGHT #{adminConfig.current_fight}</div>
+          <div className="text-sm tracking-widest">GAME #{adminConfig.current_game}</div>
         </div>
 
         <div className="flex-1 flex flex-col items-center">
           <span className="text-xl font-bold tracking-widest mb-1">PAYOUT</span>
           <div className="flex w-[340px] h-12 rounded-full overflow-hidden shadow-lg">
             <div
-              style={{ flex: meronOdds }}
+              style={{ flex: fightData.meron_odds }}
               className={`transition-all bg-gradient-to-t from-red-700 to-red-500 flex items-center justify-center`}
             >
-              <span className="text-white font-bold">{meronOdds}</span>
+              <span className="text-white font-bold">{fightData.meron_odds}</span>
             </div>
-            {/* <div
-              style={{ flex: drawOdds }}
-              className={`transition-all bg-gradient-to-t from-yellow-500 to-yellow-300 flex items-center justify-center`}
-            >
-              <span className="text-white text-xs font-bold">{drawOdds}</span>
-            </div> */}
             <div
-              style={{ flex: walaOdds }}
+              style={{ flex: fightData.wala_odds }}
               className={`transition-all bg-gradient-to-t from-blue-700 to-blue-500 flex items-center justify-center`}
             >
-              <span className="text-white font-bold">{walaOdds}</span>
+              <span className="text-white font-bold">{fightData.wala_odds}</span>
             </div>
           </div>
           <div className="flex w-full mt-1 text-base text-black font-bold justify-around items-center">
-            <span className="font-bold text-red-500"><span className="font-mono text-lg">₱</span>{formatNumber(meronTotal)}</span>
-            {/* <span className="font-bold text-yellow-400"><span className="font-mono text-lg">₱</span>{formatNumber(drawTotal)}</span> */}
-            <span className="font-bold text-blue-500"><span className="font-mono text-lg">₱</span>{formatNumber(walaTotal)}</span>
+            <span className="font-bold text-red-500"><span className="font-mono text-lg">₱</span>{formatNumber(fightData.meron_total)}</span>
+            <span className="font-bold text-blue-500"><span className="font-mono text-lg">₱</span>{formatNumber(fightData.wala_total)}</span>
           </div>
         </div>
 
@@ -111,16 +166,16 @@ export default function ActiveFight( {currentFight } : { currentFight: number })
             </div>
             <button
               className={`font-bold w-1/3 px-6 py-2 rounded-lg shadow transition flex items-center justify-center ${
-                fightStatus === "OPEN"
+                fightData.status === "OPEN"
                   ? "bg-green-500 text-white hover:bg-green-600"
-                  : fightStatus === "CLOSED"
+                  : fightData.status === "CLOSED"
                   ? "bg-red-600 text-white hover:bg-red-700"
                   : "bg-yellow-400 text-white hover:bg-yellow-500"
-              } ${selectedOutcome !== "PENDING" ? "opacity-50" : ""}`}
+              } ${fightData.outcome !== "PENDING" ? "opacity-50" : ""}`}
               onClick={changeFightStatus}
-              disabled={selectedOutcome !== "PENDING"}
+              disabled={fightData.outcome !== "PENDING"}
             >
-              {fightStatus === "OPEN" ? " OPEN " : fightStatus === "CLOSED" ? "CLOSED" : "STANDBY"}
+              {fightData.status === "OPEN" ? " OPEN " : fightData.status === "CLOSED" ? "CLOSED" : "STANDBY"}
             </button>
           </div>
           <div className="flex w-full flex-row items-center justify-end gap-4">
@@ -129,16 +184,16 @@ export default function ActiveFight( {currentFight } : { currentFight: number })
             </div>
             <button
               className={`font-bold w-1/3 px-6 py-2 rounded-lg shadow transition flex items-center justify-center ${
-                selectedOutcome === "MERON"
+                fightData.outcome === "MERON"
                   ? "bg-red-600 text-white hover:bg-red-700"
-                  : selectedOutcome === "WALA"
+                  : fightData.outcome === "WALA"
                   ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : selectedOutcome === "DRAW"
+                  : fightData.outcome === "DRAW"
                   ? "bg-yellow-500 text-white hover:bg-yellow-600"
                   : "bg-gray-500 text-white hover:bg-gray-600"
               }`}
             >
-              {selectedOutcome}
+              {fightData.outcome}
             </button>
           </div>
         </div>
@@ -146,36 +201,36 @@ export default function ActiveFight( {currentFight } : { currentFight: number })
 
       <div className="flex gap-6 mt-2">
         <button
-          className={`flex-1 bg-gradient-to-t from-red-700 to-red-500 hover:from-red-800 hover:to-red-600 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${selectedOutcome !== "PENDING" ? "opacity-50" : ""}`}
+          className={`flex-1 bg-gradient-to-t from-red-700 to-red-500 hover:from-red-800 hover:to-red-600 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${fightData.outcome !== "PENDING" ? "opacity-50" : ""}`}
           onClick={() => confirmOutcome("MERON")}
-          disabled={selectedOutcome !== "PENDING"}
+          disabled={fightData.outcome !== "PENDING"}
         >
           MERON WIN
         </button>
         <button
-          className={`flex-1 bg-gradient-to-t from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${selectedOutcome !== "PENDING" ? "opacity-50" : ""}`}
+          className={`flex-1 bg-gradient-to-t from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${fightData.outcome !== "PENDING" ? "opacity-50" : ""}`}
           onClick={() => confirmOutcome("WALA")}
-          disabled={selectedOutcome !== "PENDING"}
+          disabled={fightData.outcome !== "PENDING"}
         >
           WALA WIN
         </button>
         <button
-          className={`flex-1 bg-gradient-to-b from-yellow-300 to-yellow-500 hover:from-yellow-400 hover:to-yellow-600 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${selectedOutcome !== "PENDING" ? "opacity-50" : ""}`}
+          className={`flex-1 bg-gradient-to-b from-yellow-300 to-yellow-500 hover:from-yellow-400 hover:to-yellow-600 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${fightData.outcome !== "PENDING" ? "opacity-50" : ""}`}
           onClick={() => confirmOutcome("DRAW")}
-          disabled={selectedOutcome !== "PENDING"}
+          disabled={fightData.outcome !== "PENDING"}
         >
           DRAW
         </button>
         <button
-          className={`flex-1 bg-gradient-to-b from-neutral-600 to-neutral-800 hover:from-neutral-700 hover:to-neutral-900 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${selectedOutcome !== "PENDING" ? "opacity-50" : ""}`}
+          className={`flex-1 bg-gradient-to-b from-neutral-600 to-neutral-800 hover:from-neutral-700 hover:to-neutral-900 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${fightData.outcome !== "PENDING" ? "opacity-50" : ""}`}
           onClick={() => confirmOutcome("CANCELLED")}
-          disabled={selectedOutcome !== "PENDING"}
+          disabled={fightData.outcome !== "PENDING"}
         >
           CANCEL
         </button>
         <button
-          disabled={selectedOutcome === "PENDING"}
-          className={`flex-1 bg-gradient-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${selectedOutcome === "PENDING" ? "opacity-50" : ""}`}
+          disabled={fightData.outcome === "PENDING"}
+          className={`flex-1 bg-gradient-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-semibold text-xl py-3 rounded-lg shadow transition ${fightData.outcome === "PENDING" ? "opacity-50" : ""}`}
           onClick={() => { confirmOutcome("RESET") }}
         >
           RESET

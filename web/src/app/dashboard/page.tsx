@@ -8,7 +8,7 @@ import { useState } from "react";
 import Menu from "../components/menu";
 
 export default function Dashboard() {
-    const [showMenu, setShowMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden font-orbitron tracking-widest">
@@ -52,7 +52,7 @@ export default function Dashboard() {
                         ACTIVE FIGHT
                     </span>
                     <div className="w-full flex items-center justify-center bg-gradient-to-b from-white via-white to-gray-400 rounded-xl shadow-lg p-6 mb-8">
-                        <ActiveFight currentFight={5}/>
+                        <ActiveFight/>
                     </div>
                 </div>
 
@@ -61,7 +61,7 @@ export default function Dashboard() {
                         ADMIN CONTROLS
                     </span>
                     <div className="w-full flex items-center justify-center">
-                        <AdminControls currentFight={5}/>
+                        <AdminControls/>
                     </div>
                 </div>
             </div>
